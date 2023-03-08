@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "module": "commonjs",
+        "sourceMap": true,
+        "strict": false,
+        "noImplicitAny": false,
+        "strictPropertyInitialization": false,
+        "esModuleInterop": true,
+        "types": [],
+        "outDir": "build"
+    },
+    "include": ["src/*", "types/*"],
+    "exclude": ["node_modules/**/src/**"]
+}
