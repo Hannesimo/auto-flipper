@@ -1,10 +1,14 @@
 import { ScoreBoard } from 'mineflayer'
 const { mineflayer: mineflayerViewer } = require('prismarine-viewer')
 import { createBot } from 'mineflayer'
+import { createFastWindowClicker, getWindowTitle } from './fastWindowClick'
+import { addLoggerToClientWriteFunction, debug, logMcChat } from './logger'
 const WebSocket = require('ws')
+require('dotenv').config()
 
 const ingameName = 'MercuryPickles'
-const wss = new WebSocket(`wss://sky.coflnet.com/modsocket?player=${ingameName}&version=1.4.3-Alpha`)
+const version = '1.4.3-Alpha'
+const wss = new WebSocket(`wss://sky.coflnet.com/modsocket?player=${ingameName}&version=${version}`)
 
 let durationSet = false
 let data
@@ -12,6 +16,7 @@ let itemName: string
 let setPrice = false
 let lastCommand: string
 let lastTargetPrice: number
+let isCurrentlyPurchasing: boolean = false
 
 const bot = createBot({
     username: 'bot',
@@ -20,6 +25,11 @@ const bot = createBot({
     version: '1.8.9',
     host: 'mc.hypixel.net'
 })
+
+const windowClicker = createFastWindowClicker(bot._client)
+if (process.env.LOG_PACKAGES === 'true') {
+    addLoggerToClientWriteFunction(bot._client)
+}
 
 bot.once('spawn', async () => {
     mineflayerViewer(bot, { port: 3007, firstPerson: false })
@@ -49,30 +59,33 @@ bot.once('spawn', async () => {
     })
 })
 
-async function onScoreboardChanged(scoreboard: ScoreBoard) {
-    if (scoreboard.title.includes('SKYBLOCK')) {
-        bot.removeListener('scoreboardTitleChanged', onScoreboardChanged)
-        console.log('Joined SkyBlock')
-        await sleep(2500)
-        // bot.chat('/is')
-
-        console.log(bot.inventory)
-    }
-}
-
 wss.onmessage = msg => {
     let data = JSON.parse(msg.data)
     data.data = JSON.parse(data.data)
 
     switch (data.type) {
         case 'flip':
+            // Timeout of 1 second after trying to buy one flip to not disrupt buying process
+            // TODO: Optimize to end lock after purchase was successful or failed
+            if (isCurrentlyPurchasing) {
+                setTimeout(() => {
+                    isCurrentlyPurchasing = false
+                }, 1000)
+                return
+            }
+            isCurrentlyPurchasing = true
             lastCommand = data.data.messages[0]['onClick']
             let messageParts: string[] = data.data.messages[0]['text'].split(' ')
             let arrowIndex = messageParts.indexOf('->')
             lastTargetPrice = parseInt(messageParts[arrowIndex + 1].replace(/,/g, ''))
 
             bot.chat(data.data.messages[0]['onClick'])
-            logMcChat(data.data.messages[0].text)
+            setTimeout(() => {
+                windowClicker.click_purchase(data.data.startingBid)
+                setTimeout(() => {
+                    windowClicker.click_confirm(data.data.startingBid, data.data.itemName)
+                }, 50)
+            }, 50)
             break
         case 'chatMessage':
         case 'writeToChat':
@@ -95,32 +108,14 @@ wss.onmessage = msg => {
     }
 }
 
-bot.on('windowOpen', window => {
-    let title = getWindowTitle(window)
-    debug('New window open. Window title is ' + title)
-    if (title == 'BIN Auction View') {
-        if (window.slots[31].name.includes('stained_glass_pane')) {
-            debug('Own auction open, closing window')
-            bot.closeWindow(window)
-        }
-        if (window.slots[31].name.includes('bed')) {
-            let interval = setInterval(() => {
-                if (bot.currentWindow == window) {
-                    clickWindow(31)
-                } else {
-                    clearInterval(interval)
-                }
-            }, 500)
-        }
-        debug(window.slots[31])
-        debug('New BIN Auction View, clicking slot 31')
-        clickWindow(31)
+async function onScoreboardChanged(scoreboard: ScoreBoard) {
+    if (scoreboard.title.includes('SKYBLOCK')) {
+        bot.removeListener('scoreboardTitleChanged', onScoreboardChanged)
+        debug('Joined SkyBlock')
+        await sleep(2500)
+        bot.chat('/is')
     }
-    if (title == 'Confirm Purchase') {
-        debug('New Confirm Purchase, clicking slot 11')
-        clickWindow(11)
-    }
-})
+}
 
 async function tradePerson(data: TradeData) {
     let addedCoins = false
@@ -256,7 +251,7 @@ async function sellHandler(sellWindow) {
             let clickSlot
             debug(data)
             sellWindow.slots.forEach(item => {
-                if (item && item.nbt.value.display.value.Name.value.includes(data.itemName)) clickSlot = item.slot
+                if (item && item.nbt.value.display?.value.Name.value.includes(data.itemName)) clickSlot = item.slot
             })
             clickWindow(clickSlot)
             debug('added item')
@@ -287,7 +282,7 @@ async function sellHandler(sellWindow) {
     }
     if (title == 'Auction Duration') {
         clickWindow(16)
-        handleTime(data.duration).then(() => {
+        setAuctionDuration(data.duration).then(() => {
             durationSet = true
         })
     }
@@ -300,7 +295,7 @@ async function sellHandler(sellWindow) {
     }
 }
 
-async function handleTime(time: number) {
+async function setAuctionDuration(time: number) {
     return new Promise<void>(resolve => {
         bot._client.once('open_sign_entity', ({ location }) => {
             debug('New sign entity')
@@ -343,63 +338,10 @@ async function swapProfile(data: SwapData) {
     })
 }
 
-async function sleep(ms: number): Promise<void> {
-    return await new Promise(resolve => setTimeout(resolve, ms))
-}
-
-function debug(string: any) {
-    let currentDate = new Date()
-    console.log(
-        `[${currentDate.getHours().toString().length === 1 ? `0${currentDate.getHours().toString()}` : currentDate.getHours().toString()}:${
-            currentDate.getMinutes().toString().length === 1 ? `0${currentDate.getMinutes().toString()}` : currentDate.getMinutes().toString()
-        }] ` +
-            '\x1b[33m[DEBUG] \x1b[36m' +
-            JSON.stringify(string)
-    )
-}
-
-function getWindowTitle(window) {
-    // This worked before, for some reason it doesnt anymore
-    // let title = JSON.parse(window.title)['translate']
-    return JSON.parse(window.title)['extra'][0]['text']
-}
-
-function logMcChat(string: string) {
-    let msg = ''
-    let split = string.split('§')
-    msg += split[0]
-    for (let a of string.split('§').slice(1, split.length)) {
-        let color = a.charAt(0)
-        let message
-
-        if (Object.keys(colors).includes(color)) {
-            msg += colors[color]
-        }
-        message = a.substring(1, a.length)
-        msg += message
-    }
-    console.log('\x1b[0m\x1b[1m\x1b[90m' + msg + '\x1b[0m')
-}
-
 async function clickWindow(slot: number) {
     return bot.clickWindow(slot, 0, 0)
 }
 
-const colors = {
-    0: '\x1b[0m\x1b[30m',
-    1: '\x1b[0m\x1b[34m',
-    2: '\x1b[0m\x1b[32m',
-    3: '\x1b[0m\x1b[36m',
-    4: '\x1b[0m\x1b[31m',
-    5: '\x1b[0m\x1b[35m',
-    6: '\x1b[0m\x1b[33m',
-    7: '\x1b[0m\x1b[1m\x1b[90m',
-    8: '\x1b[0m\x1b[90m',
-    9: '\x1b[0m\x1b[34m',
-    a: '\x1b[0m\x1b[32m',
-    b: '\x1b[0m\x1b[36m',
-    c: '\x1b[0m\x1b[31m',
-    d: '\x1b[0m\x1b[35m',
-    e: '\x1b[0m\x1b[33m',
-    f: '\x1b[0m\x1b[37m'
+async function sleep(ms: number): Promise<void> {
+    return await new Promise(resolve => setTimeout(resolve, ms))
 }
