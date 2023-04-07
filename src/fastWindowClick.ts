@@ -4,14 +4,13 @@ import { logPacket } from './logger'
 
 export function createFastWindowClicker(client: Client): FastWindowClicker {
     let actionCounter = 1
-    let lastWindowId = 1
+    let lastWindowId = 0
 
     let windowClicker = {
         // click purchase in window "BIN Auction View"
-        click_purchase: function (price: number) {
-            actionCounter += 1
+        clickPurchase: function (price: number, windowId: number) {
             client.write('window_click', {
-                windowId: lastWindowId,
+                windowId: windowId,
                 slot: 31,
                 mouseButton: 0,
                 action: actionCounter,
@@ -43,13 +42,13 @@ export function createFastWindowClicker(client: Client): FastWindowClicker {
                     }
                 }
             })
+            actionCounter += 1
         },
         // click confirm in window "Confirm Purchase"
-        click_confirm: function (price: number, itemName: string) {
-            actionCounter += 1
+        clickConfirm: function (price: number, itemName: string, windowId: number) {
             client.write('window_click', {
-                windowId: lastWindowId,
-                slot: 31,
+                windowId: windowId,
+                slot: 11,
                 mouseButton: 0,
                 action: actionCounter,
                 mode: 0,
@@ -80,12 +79,26 @@ export function createFastWindowClicker(client: Client): FastWindowClicker {
                     }
                 }
             })
+            actionCounter += 1
+        },
+        onAuctionWasAlreadyBought: function () {
+            // to be overwritten
+        },
+        getLastWindowId: function () {
+            return lastWindowId
         }
     }
 
     client.on('packet', function (packet, packetMeta) {
         if (packetMeta.name === 'open_window') {
             lastWindowId = packet.windowId
+        }
+        if (packetMeta.name === 'window_items') {
+            packet.items.forEach(item => {
+                if (item.blockId === 392 && item.nbtData?.value?.display?.value?.Lore?.value?.value?.toString()?.includes('Someone else purchased the item!')) {
+                    windowClicker.onAuctionWasAlreadyBought()
+                }
+            })
         }
         logPacket(packet, packetMeta, false)
     })

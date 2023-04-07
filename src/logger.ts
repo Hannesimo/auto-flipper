@@ -1,14 +1,14 @@
 import { Client, PacketMeta } from 'minecraft-protocol'
 
 export function debug(string: any) {
-    if (process.env.LOGGING !== 'true') {
+    if (process.env.LOG_DEBUG !== 'true') {
         return
     }
     let currentDate = new Date()
     console.log(
         `[${currentDate.getHours().toString().length === 1 ? `0${currentDate.getHours().toString()}` : currentDate.getHours().toString()}:${
             currentDate.getMinutes().toString().length === 1 ? `0${currentDate.getMinutes().toString()}` : currentDate.getMinutes().toString()
-        }] ` +
+        }:${currentDate.getSeconds().toString().length === 1 ? `0${currentDate.getSeconds().toString()}` : currentDate.getSeconds().toString()}] ` +
             '\x1b[33m[DEBUG] \x1b[36m' +
             JSON.stringify(string)
     )
@@ -56,15 +56,12 @@ export function logPacket(packet: any, packetMeta: PacketMeta, toServer: boolean
     if (hidePackets.indexOf(packetMeta.name) !== -1) {
         return
     }
-    if (packetMeta.name !== 'window_click' && packetMeta.name !== 'open_window') {
+    if (packetMeta.name !== 'window_click' && packetMeta.name !== 'open_window' && packetMeta.name !== 'window_items') {
         return
-    }
-    if (packetMeta.name === 'window_click' && packet.item?.nbtData?.value) {
-        packet.item.nbtData.value = JSON.stringify(packet.item.nbtData.value)
     }
     console.log('---------------------------------')
     console.log(toServer ? 'toServer' : 'toClient')
-    console.log(packet)
+    console.log(JSON.stringify(packet))
     console.log(packetMeta)
 }
 

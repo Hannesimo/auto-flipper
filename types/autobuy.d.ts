@@ -1,6 +1,6 @@
 interface SellData {
     price: number
-    itemName: string
+    slot: number
     duration: number
 }
 
@@ -12,4 +12,11 @@ interface TradeData {
 
 interface SwapData {
     profile: string
+}
+
+interface Flip {
+    id: string
+    startingBid: number
+    purchaseAt: Date
+    itemName: string
 }

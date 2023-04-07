@@ -1,4 +1,6 @@
 interface FastWindowClicker {
-    click_purchase(price: number): void
-    click_confirm(price: number, itemName: string): void
+    clickPurchase(price: number, windowId: number): void
+    clickConfirm(price: number, itemName: string, windowId: number): void
+    onAuctionWasAlreadyBought(): void
+    getLastWindowId(): number
 }
