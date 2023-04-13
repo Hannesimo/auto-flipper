@@ -1,12 +1,21 @@
 import { Client } from 'minecraft-protocol'
 import { numberWithThousandsSeparators } from './formatter'
-import { logPacket } from './logger'
+import { debug, logPacket } from './logger'
 
-export function createFastWindowClicker(client: Client): FastWindowClicker {
+let windowClicker
+
+export function getFastWindowClicker(): FastWindowClicker {
+    if (windowClicker) {
+        return windowClicker
+    }
+    throw 'Window Clicker not created!'
+}
+
+export function createFastWindowClicker(client: Client) {
     let actionCounter = 1
     let lastWindowId = 0
 
-    let windowClicker = {
+    let _windowClicker = {
         // click purchase in window "BIN Auction View"
         clickPurchase: function (price: number, windowId: number) {
             client.write('window_click', {
@@ -82,7 +91,7 @@ export function createFastWindowClicker(client: Client): FastWindowClicker {
             actionCounter += 1
         },
         onAuctionWasAlreadyBought: function () {
-            // to be overwritten
+            debug('Auction was already bought')
         },
         getLastWindowId: function () {
             return lastWindowId
@@ -102,17 +111,5 @@ export function createFastWindowClicker(client: Client): FastWindowClicker {
         }
         logPacket(packet, packetMeta, false)
     })
-    return windowClicker
-}
-
-export function getWindowTitle(window) {
-    if (window.title) {
-        // This worked before, for some reason it doesnt anymore
-        // let title = JSON.parse(window.title)['translate']
-        return JSON.parse(window.title)['extra'][0]['text']
-    }
-    if (window.windowTitle) {
-        return JSON.parse(window.windowTitle)['extra'][0]['text']
-    }
-    return ''
+    windowClicker = _windowClicker
 }

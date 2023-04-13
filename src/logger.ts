@@ -1,17 +1,32 @@
 import { Client, PacketMeta } from 'minecraft-protocol'
+const fs = require('fs')
+let isFirstDebug = true
 
 export function debug(string: any) {
+    if (isFirstDebug) {
+        if (process.env.LOG_TO_FILE === 'true') {
+            fs.writeFileSync('log.txt', '')
+        }
+        isFirstDebug = false
+    }
+
     if (process.env.LOG_DEBUG !== 'true') {
         return
     }
     let currentDate = new Date()
-    console.log(
+    let debugString =
         `[${currentDate.getHours().toString().length === 1 ? `0${currentDate.getHours().toString()}` : currentDate.getHours().toString()}:${
             currentDate.getMinutes().toString().length === 1 ? `0${currentDate.getMinutes().toString()}` : currentDate.getMinutes().toString()
         }:${currentDate.getSeconds().toString().length === 1 ? `0${currentDate.getSeconds().toString()}` : currentDate.getSeconds().toString()}] ` +
-            '\x1b[33m[DEBUG] \x1b[36m' +
-            JSON.stringify(string)
-    )
+        '\x1b[33m[DEBUG] \x1b[36m' +
+        JSON.stringify(string)
+
+    if (process.env.LOG_TO_CONSOLE === 'true') {
+        console.log(debugString)
+    }
+    if (process.env.LOG_TO_FILE === 'true') {
+        fs.writeFileSync('log.txt', debugString + '\n', { flag: 'a+' })
+    }
 }
 
 export function logPacket(packet: any, packetMeta: PacketMeta, toServer: boolean) {
@@ -53,16 +68,25 @@ export function logPacket(packet: any, packetMeta: PacketMeta, toServer: boolean
         'entity_effect',
         'block_change'
     ]
+
     if (hidePackets.indexOf(packetMeta.name) !== -1) {
         return
     }
     if (packetMeta.name !== 'window_click' && packetMeta.name !== 'open_window' && packetMeta.name !== 'window_items') {
         return
     }
-    console.log('---------------------------------')
-    console.log(toServer ? 'toServer' : 'toClient')
-    console.log(JSON.stringify(packet))
-    console.log(packetMeta)
+    if (process.env.LOG_TO_CONSOLE === 'true') {
+        console.log('---------------------------------')
+        console.log(toServer ? 'toServer' : 'toClient')
+        console.log(JSON.stringify(packet))
+        console.log(packetMeta)
+    }
+    if (process.env.LOG_TO_FILE === 'true') {
+        fs.writeFileSync('log.txt', '---------------------------------' + '\n', { flag: 'a+' })
+        fs.writeFileSync('log.txt', (toServer ? 'toServer' : 'toClient') + '\n', { flag: 'a+' })
+        fs.writeFileSync('log.txt', JSON.stringify(packet) + '\n', { flag: 'a+' })
+        fs.writeFileSync('log.txt', JSON.stringify(packetMeta) + '\n', { flag: 'a+' })
+    }
 }
 
 export function logMcChat(string: string) {
