@@ -2,19 +2,25 @@ import { ScoreBoard } from 'mineflayer'
 import { createBot } from 'mineflayer'
 import { createFastWindowClicker } from './fastWindowClick'
 import { addLoggerToClientWriteFunction, debug, logMcChat } from './logger'
-import { clickWindow, getWindowTitle, sleep } from './utils'
+import { clickWindow, sleep } from './utils'
 import { onWebsocketCreateAuction } from './sellHandler'
 import { tradePerson } from './tradeHandler'
 import { swapProfile } from './swapProfileHandler'
 import { flipHandler } from './flipHandler'
 import { registerIngameMessageHandler } from './ingameMessageHandler'
 import { MyBot, TextMessageData } from '../types/autobuy'
+import { getConfigProperty, initConfigHelper, updatePersistentConfigProperty } from './configHelper'
 const WebSocket = require('ws')
+var prompt = require('prompt-sync')()
 require('dotenv').config()
-
-const ingameName = 'MercuryPickles'
+initConfigHelper()
 const version = '1.5.0-af'
 let wss: WebSocket
+let ingameName = getConfigProperty('INGAME_NAME')
+if (!ingameName) {
+    ingameName = prompt('Enter your ingame name: ')
+    updatePersistentConfigProperty('INGAME_NAME', ingameName)
+}
 
 const bot: MyBot = createBot({
     username: ingameName,
@@ -26,7 +32,7 @@ const bot: MyBot = createBot({
 bot.state = 'gracePeriod'
 createFastWindowClicker(bot._client)
 
-if (process.env.LOG_PACKAGES === 'true') {
+if (getConfigProperty('LOG_PACKAGES') === 'true') {
     addLoggerToClientWriteFunction(bot._client)
 }
 

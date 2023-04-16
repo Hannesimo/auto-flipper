@@ -27,7 +27,6 @@ export async function onWebsocketCreateAuction(bot: MyBot, data: SellData) {
 
 async function sellItem(data: SellData, bot: MyBot) {
     let handler = function (window: any) {
-        debug('Going into handler')
         sellHandler(data, bot, window, () => {
             bot.removeListener('windowOpen', handler)
         })
@@ -37,18 +36,32 @@ async function sellItem(data: SellData, bot: MyBot) {
 }
 
 async function sellHandler(data: SellData, bot: MyBot, sellWindow, removeEventListenerCallback: Function) {
-    debug('Going into sellHandler')
     let title = getWindowTitle(sellWindow)
     debug(title)
     if (title.toString().includes('Auction House')) {
         clickWindow(bot, 15)
     }
     if (title == 'Manage Auctions') {
-        debug(sellWindow.slots)
         let clickSlot
-        sellWindow.slots.forEach(item => {
-            if (item && item.nbt.value.display.value.Name.value.includes('Create Auction')) clickSlot = item.slot
-        })
+        for (let i = 0; i < sellWindow.slots.length; i++) {
+            const item = sellWindow.slots[i]
+            if (item && item.nbt.value.display.value.Name.value.includes('Create Auction')) {
+                if (item && (item.nbt as any).value?.display?.value?.Lore?.value?.value?.toString().includes('You reached the maximum number')) {
+                    debug('Maximum number of auctons reached -> cant sell')
+                    removeEventListenerCallback()
+                    bot.state = null
+                    return
+                }
+                clickSlot = item.slot
+            }
+            if (item && item.type === 380 && (item.nbt as any).value?.display?.value?.Name?.value?.toString().includes('Claim All')) {
+                debug('Found cauldron to claim all sold auctions -> clicking index ' + item.slot)
+                clickWindow(bot, item.slot)
+                removeEventListenerCallback()
+                bot.state = null
+                return
+            }
+        }
         clickWindow(bot, clickSlot)
     }
     if (title == 'Create Auction') {

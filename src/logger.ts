@@ -1,16 +1,17 @@
 import { Client, PacketMeta } from 'minecraft-protocol'
+import { getConfigProperty } from './configHelper'
 const fs = require('fs')
 let isFirstDebug = true
 
 export function debug(string: any) {
     if (isFirstDebug) {
-        if (process.env.LOG_TO_FILE === 'true') {
+        if (getConfigProperty("LOG_TO_FILE") === 'true') {
             fs.writeFileSync('log.txt', '')
         }
         isFirstDebug = false
     }
 
-    if (process.env.LOG_DEBUG !== 'true') {
+    if (getConfigProperty("LOG_DEBUG") !== 'true') {
         return
     }
     let currentDate = new Date()
@@ -21,16 +22,16 @@ export function debug(string: any) {
         '\x1b[33m[DEBUG] \x1b[36m' +
         JSON.stringify(string)
 
-    if (process.env.LOG_TO_CONSOLE === 'true') {
+    if (getConfigProperty("LOG_TO_CONSOLE") === 'true') {
         console.log(debugString)
     }
-    if (process.env.LOG_TO_FILE === 'true') {
+    if (getConfigProperty("LOG_TO_FILE") === 'true') {
         fs.writeFileSync('log.txt', debugString + '\n', { flag: 'a+' })
     }
 }
 
 export function logPacket(packet: any, packetMeta: PacketMeta, toServer: boolean) {
-    if (process.env.LOG_PACKAGES !== 'true') {
+    if (getConfigProperty("LOG_PACKAGES") !== 'true') {
         return
     }
     let hidePackets = [
@@ -75,13 +76,13 @@ export function logPacket(packet: any, packetMeta: PacketMeta, toServer: boolean
     if (packetMeta.name !== 'window_click' && packetMeta.name !== 'open_window' && packetMeta.name !== 'window_items') {
         return
     }
-    if (process.env.LOG_TO_CONSOLE === 'true') {
+    if (getConfigProperty("LOG_TO_CONSOLE") === 'true') {
         console.log('---------------------------------')
         console.log(toServer ? 'toServer' : 'toClient')
         console.log(JSON.stringify(packet))
         console.log(packetMeta)
     }
-    if (process.env.LOG_TO_FILE === 'true') {
+    if (getConfigProperty("LOG_TO_FILE") === 'true') {
         fs.writeFileSync('log.txt', '---------------------------------' + '\n', { flag: 'a+' })
         fs.writeFileSync('log.txt', (toServer ? 'toServer' : 'toClient') + '\n', { flag: 'a+' })
         fs.writeFileSync('log.txt', JSON.stringify(packet) + '\n', { flag: 'a+' })

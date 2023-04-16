@@ -19,17 +19,28 @@ export function registerIngameMessageHandler(bot: MyBot) {
                         return
                     }
                     bot.state = 'claiming'
-                    debug('New item purchased')
+                    debug('New item purchased -> ' + auctionViewCommand)
+
+                    let windowHasOpened = false
                     bot.chat(auctionViewCommand)
+
+                    setTimeout(() => {
+                        if (!windowHasOpened) {
+                            debug('Claiming of purchased auction failed. Removing lock')
+                            bot.state = null
+                        }
+                    }, 2000)
+
                     bot.once('windowOpen', window => {
+                        windowHasOpened = true
                         let title = getWindowTitle(window)
                         if (title == 'BIN Auction View') {
                             if (window.slots[31].name.includes('gold_block')) {
                                 debug('New BIN Auction View, clicking slot 31, claiming purchased auction')
                                 clickWindow(bot, 31)
-                                bot.state = null
                             }
                         }
+                        bot.state = null
                     })
                 }
                 claimPurchasedFunction(bot.lastViewAuctionCommandForPurchase)

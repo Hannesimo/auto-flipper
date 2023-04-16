@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.ts",
   "scripts": {
-    "start": "tsc && node ./build/index.js",
+    "start": "tsc && node ./build/index.js --trace-warnings",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build-executables": "tsc && pkg ./build/index.js"
   },
@@ -13,8 +13,10 @@
   "license": "ISC",
   "dependencies": {
     "dotenv": "^16.0.3",
+    "json2toml": "^4.0.1",
     "mineflayer": "^4.8.1",
-    "mineflayer-pathfinder": "^2.4.2",
+    "prompt-sync": "^4.2.0",
+    "toml": "^3.0.0",
     "ws": "^8.11.0"
   },
   "devDependencies": {
