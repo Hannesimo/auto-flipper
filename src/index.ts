@@ -17,6 +17,7 @@ initConfigHelper()
 const version = '1.5.0-af'
 let wss: WebSocket
 let ingameName = getConfigProperty('INGAME_NAME')
+
 if (!ingameName) {
     ingameName = prompt('Enter your ingame name: ')
     updatePersistentConfigProperty('INGAME_NAME', ingameName)
@@ -27,8 +28,10 @@ const bot: MyBot = createBot({
     auth: 'microsoft',
     logErrors: true,
     version: '1.8.9',
-    host: 'mc.hypixel.net'
+    host: 'mc.hypixel.net',
 })
+bot.setMaxListeners(0)
+
 bot.state = 'gracePeriod'
 createFastWindowClicker(bot._client)
 
@@ -100,6 +103,7 @@ async function onScoreboardChanged(scoreboard: ScoreBoard) {
         setTimeout(() => {
             debug('Waited for grace period to end. Flips can now be bought.')
             bot.state = null
+            bot.removeAllListeners('scoreboardTitleChanged')
         }, 5500)
         await sleep(2500)
         bot.chat('/is')

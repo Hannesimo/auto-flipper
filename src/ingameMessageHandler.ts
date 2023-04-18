@@ -4,7 +4,7 @@ import { clickWindow, getWindowTitle } from './utils'
 import { ChatMessage } from 'prismarine-chat'
 
 export function registerIngameMessageHandler(bot: MyBot) {
-    let onMessageFunction = (message: ChatMessage, type) => {
+    bot.on('message', (message: ChatMessage, type) => {
         let text = message.getText(null)
 
         if (type == 'chat') {
@@ -29,7 +29,7 @@ export function registerIngameMessageHandler(bot: MyBot) {
                             debug('Claiming of purchased auction failed. Removing lock')
                             bot.state = null
                         }
-                    }, 2000)
+                    }, 5000)
 
                     bot.once('windowOpen', window => {
                         windowHasOpened = true
@@ -43,16 +43,14 @@ export function registerIngameMessageHandler(bot: MyBot) {
                         bot.state = null
                     })
                 }
-                claimPurchasedFunction(bot.lastViewAuctionCommandForPurchase)
+                claimPurchasedFunction(`${bot.lastViewAuctionCommandForPurchase}`)
             }
             if (text.startsWith('[Auction]') && text.includes('bought') && text.includes('for')) {
                 debug('New item sold')
                 claimSoldItem(bot, text.split(' bought ')[1].split(' for ')[0])
             }
         }
-    }
-
-    bot.on('message', onMessageFunction)
+    })
 }
 
 async function claimSoldItem(bot: MyBot, itemName: string) {
@@ -64,15 +62,21 @@ async function claimSoldItem(bot: MyBot, itemName: string) {
         return
     }
 
+    let timeout = setTimeout(() => {
+        debug('Seems something went wrong while claiming sold item. Removing lock')
+        bot.state = null
+        bot.removeAllListeners('windowOpen')
+    }, 10000)
+
     bot.state = 'claiming'
     bot.chat('/ah')
 
-    let handler = window => {
+    bot.on('windowOpen', window => {
         claimHandler(bot, window, itemName, () => {
-            bot.removeListener('windowOpen', handler)
+            clearTimeout(timeout)
+            bot.removeAllListeners('windowOpen')
         })
-    }
-    bot.on('windowOpen', handler)
+    })
 }
 
 async function claimHandler(bot: MyBot, window, itemName: string, removeEventListenerCallback: Function) {
@@ -80,14 +84,26 @@ async function claimHandler(bot: MyBot, window, itemName: string, removeEventLis
     if (title.toString().includes('Auction House')) {
         clickWindow(bot, 15)
     }
-    if (title == 'Manage Auctions') {
+    if (title.toString().includes('Manage Auctions')) {
+        debug('Claiming bought auction...')
         let clickSlot
 
         window.slots.forEach(item => {
-            if (item && item.nbt.value.display.value.Name.value.includes(itemName) && JSON.stringify(item.nbt.value.display.value.Lore).includes('Sold for'))
+            if (item?.nbt?.value?.display?.value?.Lore && JSON.stringify(item.nbt.value.display.value.Lore).includes('Sold for')) {
                 clickSlot = item.slot
+            }
         })
+
+        debug('Clicking auction to claim, index: ' + clickSlot)
+        debug(JSON.stringify(window.slots[clickSlot]))
+
         clickWindow(bot, clickSlot)
+    }
+    if (title == 'BIN Auction View') {
+        if (window.slots[31].name.includes('gold_block')) {
+            debug('New BIN Auction View, clicking slot 31, claiming purchased auction')
+            clickWindow(bot, 31)
+        }
         removeEventListenerCallback()
         bot.state = null
     }

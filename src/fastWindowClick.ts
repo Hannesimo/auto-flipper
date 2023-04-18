@@ -1,6 +1,6 @@
 import { Client } from 'minecraft-protocol'
-import { numberWithThousandsSeparators } from './formatter'
 import { debug, logPacket } from './logger'
+import { numberWithThousandsSeparators } from './utils'
 
 let windowClicker
 
@@ -77,7 +77,10 @@ export function createFastWindowClicker(client: Client) {
                                         type: 'list',
                                         value: {
                                             type: 'string',
-                                            value: [`┬º7Purchasing: ┬ºa┬ºf┬º9${itemName}`, `┬º7Cost: ┬º6${numberWithThousandsSeparators(price)} coins`]
+                                            value: [
+                                                `┬º7Purchasing: ┬ºa┬ºf┬º9${itemName}`,
+                                                `┬º7Cost: ┬º6${numberWithThousandsSeparators(Math.floor(price))} coins`
+                                            ]
                                         }
                                     },
                                     Name: { type: 'string', value: '┬ºaConfirm' }

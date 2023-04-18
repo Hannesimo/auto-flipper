@@ -12,9 +12,9 @@ export async function flipHandler(bot: MyBot, flip: Flip) {
         return
     }
     bot.state = 'purchasing'
-    setTimeout(() => {
-        debug("Resetting 'bot.state === purchasing' lock")
+    let timeout = setTimeout(() => {
         if (bot.state === 'purchasing') {
+            debug("Resetting 'bot.state === purchasing' lock")
             bot.state = null
         }
     }, 2500)
@@ -27,4 +27,6 @@ export async function flipHandler(bot: MyBot, flip: Flip) {
     getFastWindowClicker().clickPurchase(flip.startingBid, lastWindowId + 1)
     await sleep(50)
     getFastWindowClicker().clickConfirm(flip.startingBid, flip.itemName, lastWindowId + 2)
+    clearTimeout(timeout)
+    bot.state = null
 }

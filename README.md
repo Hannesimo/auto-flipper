@@ -19,6 +19,18 @@ As far as I am aware mineflayer only stores the credentials in `.minecraft/nmp-c
 -   The bot does not take money out of your bank, so make sure to have coins in your purse
 -   Purchased flips may stay in the inventory for a bit before being relisted. Make sure to have some space so you don't fill up your inventory after a few flips.
 
+## Getting Started
+
+### Exe
+
+To run the .exe file under Windows open the PowerShell and execute the program with `./flipper.exe`. Don't just run it by double clicking as it will use the Windows CMD and there seem to be internal issue with the npm minecraft-protocol package and CMD causing the bot to timeout after a while.
+For Mac/Linux just execute the corrisponding files as usual. I am not aware of similar issues there.
+
+### Node
+
+To run the Code directly, you need Node and npm.
+Then just run `npm install` followed by `npm run start`
+
 ## How does it work
 
 -   On the first start, enter your Ingame name, this is needed for the authentication
@@ -29,9 +41,8 @@ As far as I am aware mineflayer only stores the credentials in `.minecraft/nmp-c
 
 ## Configuration
 
-The bot creates a config.toml file after the first start. This file contains configuration properties for the bot. Currently only the ingame username is stored, so you don't need to enter it everytime.
-I may add more configurations in the future.
-The Cofl configurations apply as normal.
+The bot creates a config.toml file after the first start. This file contains configuration properties for the bot. Currently only the ingame username is stored, so you don't need to enter it everytime. I may add more configurations in the future. The Cofl configurations apply as normal.
+<br/> NOTE: The mod uses the Median price (minus a bit to sell faster) to auto-sell
 
 ## System Requirements
 
@@ -41,7 +52,12 @@ The Cofl configurations apply as normal.
 -   Stable ping, preferably under 200ms - it measure your ping and send actions ahead of time to arrive as close on time as possible
 -   Some paid plan from sky.coflnet.com
 
-# Running / Building
+## Logging
 
--   To run the code yourself just run `npm install` followed by `npm run start`
--   To build the executables just run `npm install` followed by `npm run build-executables`
+If there is something wrong with the bot and you plan to report it, please add a log file. The log file is created if you put in these into your `config.toml`.
+
+<code>
+INGAME_NAME = "YOUR_INGAME_NAME" <br/>
+LOG_DEBUG = "true" <br/>
+LOG_TO_FILE = "true"
+</code>

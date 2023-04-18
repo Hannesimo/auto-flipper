@@ -3,7 +3,7 @@ const filePath = './config.toml'
 var json2toml = require('json2toml')
 var toml = require('toml')
 let config: Config = {
-    INGAME_NAME: ''
+    INGAME_NAME: null
 }
 
 json2toml({ simple: true })
