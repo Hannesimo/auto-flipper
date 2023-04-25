@@ -8,8 +8,8 @@
         "strictPropertyInitialization": false,
         "esModuleInterop": true,
         "types": [],
-        "outDir": "build"
+        "outDir": "build",
+        "skipLibCheck": true
     },
-    "include": ["src/*", "types/*"],
-    "exclude": ["node_modules/**/src/**"]
+    "include": ["src/*", "types/*"]
 }
