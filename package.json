@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.ts",
   "scripts": {
-    "start": "tsc && node ./build/index.js",
+    "start": "tsc && node ./build/BAF.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build-executables": "tsc && pkg ./build/index.js"
+    "build-executables": "tsc && pkg ./build/BAF.js --out-path ./executables"
   },
   "keywords": [],
   "author": "",

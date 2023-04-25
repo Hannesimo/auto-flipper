@@ -53,6 +53,41 @@ export function createFastWindowClicker(client: Client) {
             })
             actionCounter += 1
         },
+        clickBedPurchase: function (price: number, windowId: number) {
+            client.write('window_click', {
+                windowId: windowId,
+                slot: 31,
+                mouseButton: 0,
+                action: actionCounter,
+                mode: 0,
+                item: {
+                    blockId: 355,
+                    itemCount: 1,
+                    itemDamage: 0,
+                    nbtData: {
+                        type: 'compound',
+                        name: '',
+                        value: {
+                            overrideMeta: { type: 'byte', value: 1 },
+                            display: {
+                                type: 'compound',
+                                value: {
+                                    Lore: {
+                                        type: 'list',
+                                        value: {
+                                            type: 'string',
+                                            value: ['', `┬º7Price: ┬º6${numberWithThousandsSeparators(price)} coins`, '', '┬ºcCan be bought soon!']
+                                        }
+                                    },
+                                    Name: { type: 'string', value: '┬º6Buy Item Right Now' }
+                                }
+                            },
+                            AttributeModifiers: { type: 'list', value: { type: 'end', value: [] } }
+                        }
+                    }
+                }
+            })
+        },
         // click confirm in window "Confirm Purchase"
         clickConfirm: function (price: number, itemName: string, windowId: number) {
             client.write('window_click', {
@@ -106,11 +141,9 @@ export function createFastWindowClicker(client: Client) {
             lastWindowId = packet.windowId
         }
         if (packetMeta.name === 'window_items') {
-            packet.items.forEach(item => {
-                if (item.blockId === 392 && item.nbtData?.value?.display?.value?.Lore?.value?.value?.toString()?.includes('Someone else purchased the item!')) {
-                    windowClicker.onAuctionWasAlreadyBought()
-                }
-            })
+            if (packet.items[31]?.nbtData?.value?.display?.value?.Lore?.value?.value?.toString()?.includes('Someone else purchased the item!')) {
+                windowClicker.onAuctionWasAlreadyBought()
+            }
         }
         logPacket(packet, packetMeta, false)
     })

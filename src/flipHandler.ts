@@ -19,13 +19,22 @@ export async function flipHandler(bot: MyBot, flip: Flip) {
         }
     }, 2500)
 
+    // TODO: Check what slot/item to click for bed flips
     let lastWindowId = getFastWindowClicker().getLastWindowId()
-    let delayUntilBuyStart = flip.purchaseAt.getTime() > new Date().getTime() ? flip.purchaseAt.getTime() - new Date().getTime() : 50
+    let isBed = flip.purchaseAt.getTime() > new Date().getTime()
+
+    let delayUntilBuyStart = isBed ? flip.purchaseAt.getTime() - new Date().getTime() : 0
+    debug(new Date().toISOString())
+    debug(flip.purchaseAt.toISOString())
+
     bot.lastViewAuctionCommandForPurchase = `/viewauction ${flip.id}`
     bot.chat(bot.lastViewAuctionCommandForPurchase)
     await sleep(delayUntilBuyStart)
-    getFastWindowClicker().clickPurchase(flip.startingBid, lastWindowId + 1)
-    await sleep(50)
+    if (isBed) {
+        getFastWindowClicker().clickBedPurchase(flip.startingBid, lastWindowId + 1)
+    } else {
+        getFastWindowClicker().clickPurchase(flip.startingBid, lastWindowId + 1)
+    }
     getFastWindowClicker().clickConfirm(flip.startingBid, flip.itemName, lastWindowId + 2)
     clearTimeout(timeout)
     bot.state = null

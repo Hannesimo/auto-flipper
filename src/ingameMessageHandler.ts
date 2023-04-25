@@ -34,6 +34,7 @@ export function registerIngameMessageHandler(bot: MyBot) {
                     bot.once('windowOpen', window => {
                         windowHasOpened = true
                         let title = getWindowTitle(window)
+                        debug(title)
                         if (title == 'BIN Auction View') {
                             if (window.slots[31].name.includes('gold_block')) {
                                 debug('New BIN Auction View, clicking slot 31, claiming purchased auction')
