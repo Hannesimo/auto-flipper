@@ -1,5 +1,5 @@
 import { MyBot, SwapData } from '../types/autobuy'
-import { debug } from './logger'
+import { log } from './logger'
 import { clickWindow, getWindowTitle } from './utils'
 
 export async function swapProfile(bot: MyBot, data: SwapData) {
@@ -15,12 +15,12 @@ export async function swapProfile(bot: MyBot, data: SwapData) {
             window.slots.forEach(item => {
                 if (item && (item.nbt.value as any).display.value.Name.value.includes((data as SwapData).profile)) clickSlot = item.slot
             })
-            debug('Clickslot is ' + clickSlot)
+            log('Clickslot is ' + clickSlot)
             clickWindow(bot, clickSlot)
         }
         if (title.includes('Profile:')) {
             clickWindow(bot, 11)
-            debug('Successfully swapped profiles')
+            log('Successfully swapped profiles')
         }
     })
 }

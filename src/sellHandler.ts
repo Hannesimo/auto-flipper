@@ -1,5 +1,5 @@
 import { MyBot, SellData } from '../types/autobuy'
-import { debug } from './logger'
+import { log } from './logger'
 import { clickWindow, getWindowTitle } from './utils'
 
 let setPrice = false
@@ -8,7 +8,7 @@ let retryCount = 0
 
 export async function onWebsocketCreateAuction(bot: MyBot, data: SellData) {
     if (bot.state) {
-        debug('Currently busy with something else (' + bot.state + ') -> not selling')
+        log('Currently busy with something else (' + bot.state + ') -> not selling')
         if (retryCount > 3) {
             retryCount = 0
             return
@@ -20,15 +20,15 @@ export async function onWebsocketCreateAuction(bot: MyBot, data: SellData) {
         return
     }
     bot.state = 'selling'
-    debug('Selling item...')
-    debug(data)
+    log('Selling item...')
+    log(data)
     sellItem(data, bot)
 }
 
 async function sellItem(data: SellData, bot: MyBot) {
 
     let timeout = setTimeout(() => {
-        debug('Seems something went wrong while selling. Removing lock')
+        log('Seems something went wrong while selling. Removing lock')
         bot.state = null
         bot.removeAllListeners('windowOpen')
     }, 10000)
@@ -45,7 +45,7 @@ async function sellItem(data: SellData, bot: MyBot) {
 
 async function sellHandler(data: SellData, bot: MyBot, sellWindow, removeEventListenerCallback: Function) {
     let title = getWindowTitle(sellWindow)
-    debug(title)
+    log(title)
     if (title.toString().includes('Auction House')) {
         clickWindow(bot, 15)
     }
@@ -55,7 +55,7 @@ async function sellHandler(data: SellData, bot: MyBot, sellWindow, removeEventLi
             const item = sellWindow.slots[i]
             if (item && item.nbt.value.display.value.Name.value.includes('Create Auction')) {
                 if (item && (item.nbt as any).value?.display?.value?.Lore?.value?.value?.toString().includes('You reached the maximum number')) {
-                    debug('Maximum number of auctons reached -> cant sell')
+                    log('Maximum number of auctons reached -> cant sell')
                     removeEventListenerCallback()
                     bot.state = null
                     return
@@ -63,7 +63,7 @@ async function sellHandler(data: SellData, bot: MyBot, sellWindow, removeEventLi
                 clickSlot = item.slot
             }
             if (item && item.type === 380 && (item.nbt as any).value?.display?.value?.Name?.value?.toString().includes('Claim All')) {
-                debug('Found cauldron to claim all sold auctions -> clicking index ' + item.slot)
+                log('Found cauldron to claim all sold auctions -> clicking index ' + item.slot)
                 clickWindow(bot, item.slot)
                 removeEventListenerCallback()
                 bot.state = null
@@ -87,13 +87,13 @@ async function sellHandler(data: SellData, bot: MyBot, sellWindow, removeEventLi
             if (!sellWindow.slots[itemSlot]) {
                 bot.state = null
                 removeEventListenerCallback()
-                debug('No item on index ' + itemSlot + ' found -> probably already sold')
+                log('No item on index ' + itemSlot + ' found -> probably already sold')
                 return
             }
             clickWindow(bot, itemSlot)
             bot._client.once('open_sign_entity', ({ location }) => {
                 let price = (data as SellData).price
-                debug('Price to set ' + Math.floor(price).toString())
+                log('Price to set ' + Math.floor(price).toString())
                 bot._client.write('update_sign', {
                     location: {
                         x: location.z,
@@ -106,7 +106,7 @@ async function sellHandler(data: SellData, bot: MyBot, sellWindow, removeEventLi
                     text4: '{"italic":false,"extra":["starting bid"],"text":""}'
                 })
             })
-            debug('opening pricer')
+            log('opening pricer')
             clickWindow(bot, 31)
             setPrice = true
         } else if (setPrice && !durationSet) {
@@ -122,7 +122,7 @@ async function sellHandler(data: SellData, bot: MyBot, sellWindow, removeEventLi
         clickWindow(bot, 16)
     }
     if (title == 'Confirm BIN Auction') {
-        debug('Successfully listed an item')
+        log('Successfully listed an item')
         clickWindow(bot, 11)
         removeEventListenerCallback()
         setPrice = false
@@ -132,7 +132,7 @@ async function sellHandler(data: SellData, bot: MyBot, sellWindow, removeEventLi
 }
 
 async function setAuctionDuration(bot: MyBot, time: number) {
-    debug('setAuctionDuration function')
+    log('setAuctionDuration function')
     return new Promise<void>(resolve => {
         bot._client.once('open_sign_entity', ({ location }) => {
             bot._client.write('update_sign', {

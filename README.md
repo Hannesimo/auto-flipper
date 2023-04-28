@@ -55,10 +55,4 @@ The bot creates a config.toml file after the first start. This file contains con
 
 ## Logging
 
-If there is something wrong with the bot and you plan to report it, please add a log file. The log file is created if you put in these into your `config.toml`.
-
-<code>
-INGAME_NAME = "YOUR_INGAME_NAME" <br/>
-LOG_DEBUG = "true" <br/>
-LOG_TO_FILE = "true"
-</code>
+If there is something wrong with the bot and you plan to report it, please add your log file

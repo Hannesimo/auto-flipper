@@ -1,37 +1,49 @@
 import { Client, PacketMeta } from 'minecraft-protocol'
 import { getConfigProperty } from './configHelper'
-const fs = require('fs')
-let isFirstDebug = true
+import winston from 'winston'
 
-export function debug(string: any) {
-    if (isFirstDebug) {
-        if (getConfigProperty("LOG_TO_FILE") === 'true') {
-            fs.writeFileSync('log.txt', '')
-        }
-        isFirstDebug = false
-    }
+let logger: winston.Logger
 
-    if (getConfigProperty("LOG_DEBUG") !== 'true') {
-        return
+export function initLogger() {
+    const loggerConfig = {
+        format: winston.format.json(),
+        transports: [],
+        exceptionHandlers: [
+            new winston.transports.File({ filename: 'log.txt', format: winston.format.combine(winston.format.timestamp(), winston.format.json()) })
+        ],
+        rejectionHandlers: [
+            new winston.transports.File({ filename: 'log.txt', format: winston.format.combine(winston.format.timestamp(), winston.format.json()) })
+        ]
     }
-    let currentDate = new Date()
-    let debugString =
-        `[${currentDate.getHours().toString().length === 1 ? `0${currentDate.getHours().toString()}` : currentDate.getHours().toString()}:${
-            currentDate.getMinutes().toString().length === 1 ? `0${currentDate.getMinutes().toString()}` : currentDate.getMinutes().toString()
-        }:${currentDate.getSeconds().toString().length === 1 ? `0${currentDate.getSeconds().toString()}` : currentDate.getSeconds().toString()}] ` +
-        '\x1b[33m[DEBUG] \x1b[36m' +
-        JSON.stringify(string)
+    if (getConfigProperty('LOG_TO_FILE') !== undefined) {
+        loggerConfig.transports.push(
+            new winston.transports.File({
+                filename: 'log.txt',
+                level: getConfigProperty('LOG_TO_FILE'),
+                format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
+                options: {
+                    flags: 'w'
+                }
+            })
+        )
+    }
+    if (getConfigProperty('LOG_TO_CONSOLE') !== undefined) {
+        loggerConfig.transports.push(
+            new winston.transports.Console({
+                level: getConfigProperty('LOG_TO_CONSOLE'),
+                format: winston.format.combine(winston.format.timestamp(), winston.format.json())
+            })
+        )
+    }
+    logger = winston.createLogger(loggerConfig)
+}
 
-    if (getConfigProperty("LOG_TO_CONSOLE") === 'true') {
-        console.log(debugString)
-    }
-    if (getConfigProperty("LOG_TO_FILE") === 'true') {
-        fs.writeFileSync('log.txt', debugString + '\n', { flag: 'a+' })
-    }
+export function log(string: any, level?: string) {
+    logger.log(level || 'info', string)
 }
 
 export function logPacket(packet: any, packetMeta: PacketMeta, toServer: boolean) {
-    if (getConfigProperty("LOG_PACKAGES") !== 'true') {
+    if (!logger.isSillyEnabled()) {
         return
     }
     let hidePackets = [
@@ -76,21 +88,11 @@ export function logPacket(packet: any, packetMeta: PacketMeta, toServer: boolean
     if (packetMeta.name !== 'window_click' && packetMeta.name !== 'open_window' && packetMeta.name !== 'window_items') {
         return
     }
-    if (getConfigProperty("LOG_TO_CONSOLE") === 'true') {
-        console.log('---------------------------------')
-        console.log(toServer ? 'toServer' : 'toClient')
-        console.log(JSON.stringify(packet))
-        console.log(packetMeta)
-    }
-    if (getConfigProperty("LOG_TO_FILE") === 'true') {
-        fs.writeFileSync('log.txt', '---------------------------------' + '\n', { flag: 'a+' })
-        fs.writeFileSync('log.txt', (toServer ? 'toServer' : 'toClient') + '\n', { flag: 'a+' })
-        fs.writeFileSync('log.txt', JSON.stringify(packet) + '\n', { flag: 'a+' })
-        fs.writeFileSync('log.txt', JSON.stringify(packetMeta) + '\n', { flag: 'a+' })
-    }
+    logger.debug(`${toServer ? 'toServer' : 'toClient'}: ${JSON.stringify(packet)}`)
+    logger.debug(`${JSON.stringify(packetMeta)}`)
 }
 
-export function logMcChat(string: string) {
+export function printMcChatToConsole(string: string) {
     let msg = ''
     let split = string.split('§')
     msg += split[0]

@@ -17,6 +17,7 @@
     "mineflayer": "^4.8.1",
     "prompt-sync": "^4.2.0",
     "toml": "^3.0.0",
+    "winston": "^3.8.2",
     "ws": "^8.11.0"
   },
   "devDependencies": {

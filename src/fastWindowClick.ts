@@ -1,5 +1,5 @@
 import { Client } from 'minecraft-protocol'
-import { debug, logPacket } from './logger'
+import { log, logPacket } from './logger'
 import { numberWithThousandsSeparators } from './utils'
 
 let windowClicker
@@ -129,7 +129,7 @@ export function createFastWindowClicker(client: Client) {
             actionCounter += 1
         },
         onAuctionWasAlreadyBought: function () {
-            debug('Auction was already bought')
+            log('Auction was already bought')
         },
         getLastWindowId: function () {
             return lastWindowId

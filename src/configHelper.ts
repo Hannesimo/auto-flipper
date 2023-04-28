@@ -3,7 +3,8 @@ const filePath = './config.toml'
 var json2toml = require('json2toml')
 var toml = require('toml')
 let config: Config = {
-    INGAME_NAME: null
+    INGAME_NAME: null,
+    SESSIONS: {}
 }
 
 json2toml({ simple: true })
@@ -16,7 +17,7 @@ export function initConfigHelper() {
     })
 }
 
-export function updatePersistentConfigProperty(property: string, value: string) {
+export function updatePersistentConfigProperty(property: string, value: any) {
     config[property] = value
     fs.writeFileSync(filePath, json2toml(config))
 }

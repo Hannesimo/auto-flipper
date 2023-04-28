@@ -1,5 +1,5 @@
 import { MyBot, TradeData } from '../types/autobuy'
-import { debug } from './logger'
+import { log } from './logger'
 import { clickWindow, sleep } from './utils'
 
 export async function tradePerson(bot: MyBot, websocket: WebSocket, data: TradeData) {
@@ -16,30 +16,30 @@ export async function tradePerson(bot: MyBot, websocket: WebSocket, data: TradeD
                 bot.chat('The server is lagging, give it a second')
                 await sleep(5000)
             } else if (msg.startsWith('Cannot find player named')) {
-                debug('Player is not avaliable to trade with, please rerequest when they are capable of trading')
+                log('Player is not avaliable to trade with, please rerequest when they are capable of trading')
                 trading = false
                 return
             } else if (msg == 'You are too far away to trade with that player!') {
                 bot.chat('Hey ' + data.target + ' come here so we can trade!')
             } else if (msg.startsWith('You have sent a trade request to ')) {
-                debug('successfully sent trade, waiting for them to accept')
+                log('successfully sent trade, waiting for them to accept')
                 bot.on('windowOpen', async window => {
                     trading = false
 
-                    debug('Trade window opened')
+                    log('Trade window opened')
                     if (!addedItems) {
                         for (let slot of data.slots) {
                             slot += 44
                             clickWindow(bot, slot)
-                            debug('Clicked slot ' + slot)
+                            log('Clicked slot ' + slot)
                         }
-                        debug('Added all items')
+                        log('Added all items')
                     }
                     if (data.coins > 0 && !addedCoins) {
                         bot._client.once('open_sign_entity', ({ location }) => {
                             let price = data.coins
-                            debug('New sign entity')
-                            debug('price to set ' + Math.floor(price).toString())
+                            log('New sign entity')
+                            log('price to set ' + Math.floor(price).toString())
                             bot._client.write('update_sign', {
                                 location: {
                                     x: location.z,
