@@ -1,3 +1,6 @@
+join the oficial discord server:
+https://www.discord.gg/eYRBsaECzY
+
 # BAF
 
 You found the Best Auto Flipper (BAF) for hypixel Skyblock
