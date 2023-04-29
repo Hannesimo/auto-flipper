@@ -11,6 +11,7 @@ import { registerIngameMessageHandler } from './ingameMessageHandler'
 import { MyBot, TextMessageData } from '../types/autobuy'
 import { getConfigProperty, initConfigHelper, updatePersistentConfigProperty } from './configHelper'
 import { getSessionId } from './coflSessionManager'
+import { setupConsoleInterface } from './consoleHandler'
 const WebSocket = require('ws')
 var prompt = require('prompt-sync')()
 require('dotenv').config()
@@ -62,6 +63,9 @@ function connectWebsocket() {
     wss.onerror = function (err) {
         log('Connection error: ' + JSON.stringify(err), 'error')
         wss.close()
+    }
+    wss.onopen = function(x) {
+        setupConsoleInterface(wss)
     }
 }
 
