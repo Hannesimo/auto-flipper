@@ -4,6 +4,7 @@ var json2toml = require('json2toml')
 var toml = require('toml')
 let config: Config = {
     INGAME_NAME: null,
+    WEBHOOK_URL: null,
     SESSIONS: {}
 }
 
