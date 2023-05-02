@@ -4,6 +4,7 @@ interface SESSIONS {
 
 interface Config {
     INGAME_NAME: string
+    WEBHOOK_URL: string
     SESSIONS: SESSIONS
 }
 
