@@ -50,7 +50,7 @@ bot.once('spawn', async () => {
     await sleep(2000)
     bot.chat('/play sb')
     bot.on('scoreboardTitleChanged', onScoreboardChanged)
-    registerIngameMessageHandler(bot, wss)
+    if(ingameName) registerIngameMessageHandler(bot, wss)
 })
 
 function connectWebsocket() {
