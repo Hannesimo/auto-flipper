@@ -1,4 +1,4 @@
-join the oficial discord server:
+Join the official Discord server:
 https://www.discord.gg/eYRBsaECzY
 
 # BAF
@@ -24,16 +24,26 @@ As far as I am aware mineflayer only stores the credentials in `.minecraft/nmp-c
 
 ## Getting Started
 
-### Exe
+### Executable
 
-To run the .exe file under Windows open the PowerShell and execute the program with `./executables/BAF-win.exe`. Don't just run it by double clicking as it will use the Windows CMD and there seems to be an internal issue with the npm minecraft-protocol package and CMD causing the bot to timeout after a while.
+For Windows there is a PowerShell-Script "BAF.ps1". This script automatically downloads/updates and starts the newest version from GitHub and saves it at `%appdata$/BAF`. Created files like the config and log file are also stored there. You can execute it by right-clicking and "Run with PowerShell".
+
+You can also paste this command into the PowerShell to run the script: `Invoke-Expression (New-Object System.Net.WebClient).DownloadString("https://raw.githubusercontent.com/Hannesimo/auto-flipper/master/start_script/BAF.ps1`. This command downloads the Script and executes it.
+
+If you want to start the .exe yourself, make sure to open the PowerShell and execute the program with `./BAF-[version]-win.exe`. Don't just run it by double clicking as it will use the Windows CMD and there seems to be an internal issue with the npm minecraft-protocol package and CMD causing the bot to timeout after a while.
+
+Tutorial on how to open PowerShell: https://www.youtube.com/watch?v=aLwq9AggFw8&t=1s
+
 For Mac/Linux just execute the corresponding files as usual. I am not aware of similar issues there.
 
 ### Node
 
 To run or build the code, you need Node and npm.
-- To run it just execute `npm install` followed by `npm run start`<br/><br/>
-- To build the executable(s), run `npm install` followed by `npm run build-executables`
+
+-   To run it just execute `npm install` followed by `npm run start`<br/><br/>
+-   To build the executables run `npm install` followed by:
+    - Windows: `npm run build-executables-win`
+    - Linux: `npm run build-executables-linux`
 
 ## How does it work
 

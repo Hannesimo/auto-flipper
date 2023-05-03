@@ -130,7 +130,7 @@ async function claimHandler(bot: MyBot, window, itemName: string, removeEventLis
         clickWindow(bot, 15)
     }
     if (title.toString().includes('Manage Auctions')) {
-        log('Claiming bought auction...')
+        log('Claiming sold auction...')
         let clickSlot
 
         window.slots.forEach(item => {
