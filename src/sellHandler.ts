@@ -1,9 +1,7 @@
 import { MyBot, SellData } from '../types/autobuy'
 import { log } from './logger'
-import { clickWindow, getWindowTitle } from './utils'
-import sendWebhook, { EmbedConstructor, WebhookConstructor } from './webhookHandler'
-import { getConfigProperty } from './configHelper'
-let webhookUrl = getConfigProperty('WEBHOOK_URL')
+import { clickWindow, getWindowTitle, numberWithThousandsSeparators } from './utils'
+import { sendWebhookItemListed } from './webhookHandler'
 
 let setPrice = false
 let durationSet = false
@@ -29,7 +27,6 @@ export async function onWebsocketCreateAuction(bot: MyBot, data: SellData) {
 }
 
 async function sellItem(data: SellData, bot: MyBot) {
-
     let timeout = setTimeout(() => {
         log('Seems something went wrong while selling. Removing lock')
         bot.state = null
@@ -78,7 +75,6 @@ async function sellHandler(data: SellData, bot: MyBot, sellWindow, removeEventLi
     if (title == 'Create Auction') {
         clickWindow(bot, 48)
     }
-    let itemName;
 
     if (title == 'Create BIN Auction') {
         if (!setPrice && !durationSet) {
@@ -91,10 +87,18 @@ async function sellHandler(data: SellData, bot: MyBot, sellWindow, removeEventLi
             if (!sellWindow.slots[itemSlot]) {
                 bot.state = null
                 removeEventListenerCallback()
-                log('No item on index ' + itemSlot + ' found -> probably already sold')
+                log('No item at index ' + itemSlot + ' found -> probably already sold')
                 return
             }
-            itemName = sellWindow.slots[itemSlot].name
+            log(sellWindow.slots[itemSlot])
+            let itemName = sellWindow.slots[itemSlot]?.displayName
+            if (itemName !== data.itemName) {
+                bot.state = null
+                removeEventListenerCallback()
+                log('Item at index ' + itemSlot + ' "' + itemName + '" does not match item that is supposed to be sold: "' + data.itemName + '" -> dont sell')
+                return
+            }
+
             clickWindow(bot, itemSlot)
             bot._client.once('open_sign_entity', ({ location }) => {
                 let price = (data as SellData).price
@@ -130,36 +134,11 @@ async function sellHandler(data: SellData, bot: MyBot, sellWindow, removeEventLi
         log('Successfully listed an item')
         clickWindow(bot, 11)
         removeEventListenerCallback()
-        let tempPrice = setPrice;
-        let tempDuration = durationSet;
         setPrice = false
         durationSet = false
         bot.state = null
-        if(webhookUrl) sendWebhook(
-            webhookUrl,
-            new WebhookConstructor()
-            .setUsername("BAF")
-            .addEmbeds([
-                new EmbedConstructor()
-                .setTitle("Item Listed")
-                .setFields([{
-                    name: "Listed Item:",
-                    value: `\`\`\`${itemName}\`\`\``,
-                    inline: false
-                }, {
-                    name: "Item Price:",
-                    value: `\`\`\`${tempPrice}\`\`\``,
-                    inline: false
-                }, {
-                    name: "AH Duration:",
-                    value: `\`\`\`${tempDuration}\`\`\``,
-                    inline: false
-                }])
-                .setThumbnail({
-                    url: `https://minotar.net/helm/${bot._client.username}/600.png`
-                })
-            ])
-        )
+
+        sendWebhookItemListed(data.itemName, numberWithThousandsSeparators(data.price), data.duration)
     }
 }
 

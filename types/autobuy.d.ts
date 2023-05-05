@@ -4,6 +4,7 @@ interface SellData {
     price: number
     slot: number
     duration: number
+    itemName: string
 }
 
 interface TradeData {

@@ -2,9 +2,7 @@ import { MyBot } from '../types/autobuy'
 import { log, printMcChatToConsole } from './logger'
 import { clickWindow, getWindowTitle } from './utils'
 import { ChatMessage } from 'prismarine-chat'
-import sendWebhook, { EmbedConstructor, WebhookConstructor } from './webhookHandler'
-import { getConfigProperty } from './configHelper'
-let webhookUrl = getConfigProperty('WEBHOOK_URL')
+import { sendWebhookItemPurchased, sendWebhookItemSold } from './webhookHandler'
 
 export function registerIngameMessageHandler(bot: MyBot, wss: WebSocket) {
     bot.on('message', (message: ChatMessage, type) => {
@@ -25,62 +23,18 @@ export function registerIngameMessageHandler(bot: MyBot, wss: WebSocket) {
                     })
                 )
                 claimPurchased(bot)
-                let itemName = text.split(' purchased ')[1].split(' for ')[0]
-                let price = text.split(' for ')[1].split(" coins!")[0]
-                if(webhookUrl) sendWebhook(
-                    webhookUrl,
-                    new WebhookConstructor()
-                    .setUsername("BAF")
-                    .addEmbeds([
-                        new EmbedConstructor()
-                        .setTitle("Item Purchased")
-                        .setFields([{
-                            name: "Item:",
-                           value: `\`\`\`${itemName}\`\`\``,
-                           inline: true
-                      }, {
-                           name: "Bought for:",
-                           value: `\`\`\`${price}\`\`\``,
-                            inline: true
-                      }])
-                      .setThumbnail({
-                         url: `https://minotar.net/helm/${bot._client.username}/600.png`
-                      })
-                    ])
-                )
+
+                sendWebhookItemPurchased(text.split(' purchased ')[1].split(' for ')[0], text.split(' for ')[1].split(' coins!')[0])
             }
             if (text.startsWith('[Auction]') && text.includes('bought') && text.includes('for')) {
                 log('New item sold')
-                let purchasedBy = text.split('[Auction] ')[1].split(" bought ")[0]
-                let itemName = text.split(' bought ')[1].split(' for ')[0]
-                let price = text.split(' for ')[1].split(" coins")[0]
-                
-                if(webhookUrl) sendWebhook(
-                    webhookUrl,
-                    new WebhookConstructor()
-                    .setUsername("BAF")
-                    .addEmbeds([
-                        new EmbedConstructor()
-                        .setTitle("Item Sold")
-                        .setFields([{
-                            name: "Purchased by:",
-                            value: `\`\`\`${purchasedBy}\`\`\``,
-                            inline: true
-                        }, {
-                            name: "Item Sold:",
-                           value: `\`\`\`${itemName}\`\`\``,
-                           inline: true
-                      }, {
-                           name: "Sold for:",
-                           value: `\`\`\`${price}\`\`\``,
-                            inline: true
-                      }])
-                      .setThumbnail({
-                         url: `https://minotar.net/helm/${bot._client.username}/600.png`
-                      })
-                    ])
-                )
                 claimSoldItem(bot, text.split(' bought ')[1].split(' for ')[0])
+
+                sendWebhookItemSold(
+                    text.split(' bought ')[1].split(' for ')[0],
+                    text.split(' for ')[1].split(' coins')[0],
+                    text.split('[Auction] ')[1].split(' bought ')[0]
+                )
             }
 
             if (bot.privacySettings && bot.privacySettings.chatRegex.test(text)) {

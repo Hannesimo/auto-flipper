@@ -1,101 +1,132 @@
-import axios from "axios";
-import { log } from "./logger";
+import axios from 'axios'
+import { getConfigProperty } from './configHelper'
 
-export class WebhookConstructor {
-    webhookData: Webhook
-    constructor(webhook?) {
-        if(webhook) this.webhookData = webhook as Webhook;
-        else this.webhookData = {} as Webhook;
+function sendWebhookData(options: Partial<Webhook>): void {
+    let data = {
+        content: options.content || '',
+        avatar_url: options.avatar_url,
+        tts: options.tts,
+        embeds: options.embeds || [],
+        username: options.username || 'BAF'
     }
-
-    setContent(text: string) {
-        this.webhookData.content = text;
-        return this;
-    }
-
-    setUsername(username: string) {
-        this.webhookData.username = username;
-        return this;
-    }
-
-    setAvatar(url: string) {
-        this.webhookData.avatar_url = url;
-        return this;
-    }
-
-    setTTS(choice: boolean) {
-        this.webhookData.tts = choice;
-        return this;
-    }
-
-    addEmbeds(embeds: Array<EmbedConstructor>) {
-        let embedsData = embeds.map(x => x.embedData);
-        this.webhookData.embeds = embedsData;
-        return this;
-    }
+    axios.post(getConfigProperty('WEBHOOK_URL'), data)
 }
 
-export class EmbedConstructor {
-    embedData: Embed
-    constructor(embed?) {
-        if(embed) this.embedData = embed as Embed;
-        else this.embedData = {} as Embed;
-    }
-    
-    setTitle(text: string) {
-        this.embedData.title = text;
-        return this;
-    }
-
-    setDescription(text: string) {
-        this.embedData.description = text;
-        return this;
-    }
-
-    setURL(text: string) {
-        this.embedData.url = text;
-        return this;
-    }
-
-    setTimestamp(time?: number) {
-        if(!time) this.embedData.timestamp = Date.now()
-        else this.embedData.timestamp = time;
-        return this;
-    }
-    
-    // To show a hexadecimal color use 0x instead of # (e.g: 0x00ffaa)
-    setColor(color?: number) {
-        if(!color) this.embedData.color = color;
-        else this.embedData.color = null;
-        return this;
-    }
-
-    setFooter(footer: EmbedFooter) {
-        this.embedData.footer = footer;
-        return this;
-    }
-
-    setImage(image: string) {
-        this.embedData.image = image;
-        return this;
-    }
-
-    setThumbnail(thumbnail: EmbedThumbnail) {
-        this.embedData.thumbnail = thumbnail;
-        return this;
-    }
-
-    setAuthor(author: EmbedAuthor) {
-        this.embedData.author = author;
-        return this;
-    }
-
-    setFields(fields: Array<EmbedField>) {
-        this.embedData.fields = fields;
-        return this;
-    }
+function isWebhookConfigured() {
+    return !!getConfigProperty('WEBHOOK_URL')
 }
 
-export default async function sendWebhook(url:string, webhook: WebhookConstructor) {
-    await axios.post(url, webhook.webhookData).then(() => log("Webhook sent :D"))
+export function sendWebhookInitialized() {
+    if (!isWebhookConfigured()) {
+        return
+    }
+    let ingameName = getConfigProperty('INGAME_NAME')
+    sendWebhookData({
+        content: 'Initialized Connection',
+        embeds: [
+            {
+                title: 'Initialized Connection',
+                fields: [
+                    { name: 'Connected as:', value: `\`\`\`${ingameName}\`\`\``, inline: false },
+                    {
+                        name: 'Started at:',
+                        value: `<t:${(Date.now() / 1000).toFixed(0)}:t>`,
+                        inline: false
+                    }
+                ],
+                thumbnail: { url: `https://minotar.net/helm/${ingameName}/600.png` }
+            }
+        ]
+    })
+}
+
+export function sendWebhookItemPurchased(itemName: string, price: string) {
+    if (!isWebhookConfigured()) {
+        return
+    }
+    let ingameName = getConfigProperty('INGAME_NAME')
+    sendWebhookData({
+        embeds: [
+            {
+                title: 'Item Purchased',
+                fields: [
+                    {
+                        name: 'Item:',
+                        value: `\`\`\`${itemName}\`\`\``,
+                        inline: true
+                    },
+                    {
+                        name: 'Bought for:',
+                        value: `\`\`\`${price}\`\`\``,
+                        inline: true
+                    }
+                ],
+                thumbnail: { url: `https://minotar.net/helm/${ingameName}/600.png` }
+            }
+        ]
+    })
+}
+
+export function sendWebhookItemSold(itemName: string, price: string, purchasedBy: string) {
+    if (!isWebhookConfigured()) {
+        return
+    }
+    let ingameName = getConfigProperty('INGAME_NAME')
+    sendWebhookData({
+        embeds: [
+            {
+                title: 'Item Sold',
+                fields: [
+                    {
+                        name: 'Purchased by:',
+                        value: `\`\`\`${purchasedBy}\`\`\``,
+                        inline: true
+                    },
+                    {
+                        name: 'Item Sold:',
+                        value: `\`\`\`${itemName}\`\`\``,
+                        inline: true
+                    },
+                    {
+                        name: 'Sold for:',
+                        value: `\`\`\`${price}\`\`\``,
+                        inline: true
+                    }
+                ],
+                thumbnail: { url: `https://minotar.net/helm/${ingameName}/600.png` }
+            }
+        ]
+    })
+}
+
+export function sendWebhookItemListed(itemName: string, price: string, duration: number) {
+    if (!isWebhookConfigured()) {
+        return
+    }
+    let ingameName = getConfigProperty('INGAME_NAME')
+    sendWebhookData({
+        embeds: [
+            {
+                title: 'Item Listed',
+                fields: [
+                    {
+                        name: 'Listed Item:',
+                        value: `\`\`\`${itemName}\`\`\``,
+                        inline: false
+                    },
+                    {
+                        name: 'Item Price:',
+                        value: `\`\`\`${price}\`\`\``,
+                        inline: false
+                    },
+                    {
+                        name: 'AH Duration:',
+                        value: `\`\`\`${duration}h\`\`\``,
+                        inline: false
+                    }
+                ],
+                thumbnail: { url: `https://minotar.net/helm/${ingameName}/600.png` }
+            }
+        ]
+    })
 }

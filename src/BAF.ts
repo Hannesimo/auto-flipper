@@ -11,8 +11,8 @@ import { registerIngameMessageHandler } from './ingameMessageHandler'
 import { MyBot, TextMessageData } from '../types/autobuy'
 import { getConfigProperty, initConfigHelper, updatePersistentConfigProperty } from './configHelper'
 import { getSessionId } from './coflSessionManager'
+import { sendWebhookInitialized } from './webhookHandler'
 import { setupConsoleInterface } from './consoleHandler'
-import sendWebhook, { EmbedConstructor, WebhookConstructor } from './webhookHandler'
 const WebSocket = require('ws')
 var prompt = require('prompt-sync')()
 require('dotenv').config()
@@ -21,7 +21,6 @@ initLogger()
 const version = '1.5.0-af'
 let wss: WebSocket
 let ingameName = getConfigProperty('INGAME_NAME')
-let webhookUrl = getConfigProperty('WEBHOOK_URL')
 
 if (!ingameName) {
     ingameName = prompt('Enter your ingame name: ')
@@ -50,11 +49,15 @@ bot.once('spawn', async () => {
     await sleep(2000)
     bot.chat('/play sb')
     bot.on('scoreboardTitleChanged', onScoreboardChanged)
-    if(ingameName) registerIngameMessageHandler(bot, wss)
+    registerIngameMessageHandler(bot, wss)
 })
 
 function connectWebsocket() {
     wss = new WebSocket(`wss://sky.coflnet.com/modsocket?player=${ingameName}&version=${version}&SId=${getSessionId(ingameName)}`)
+    wss.onopen = function () {
+        setupConsoleInterface(wss)
+        sendWebhookInitialized()
+    }
     wss.onmessage = onWebsocketMessage
     wss.onclose = function (e) {
         log('Connection closed. Reconnecting... ', 'warn')
@@ -65,31 +68,6 @@ function connectWebsocket() {
     wss.onerror = function (err) {
         log('Connection error: ' + JSON.stringify(err), 'error')
         wss.close()
-    }
-    wss.onopen = function(x) {
-        setupConsoleInterface(wss)
-        if(webhookUrl) sendWebhook(
-            webhookUrl,
-            new WebhookConstructor()
-            .setUsername("BAF")
-            .setContent("Connection initialized")
-            .addEmbeds([
-                new EmbedConstructor()
-                .setTitle("Initialized Connection")
-                .setFields([{
-                    name: "Connected as:",
-                    value: `\`\`\`${ingameName}\`\`\``,
-                    inline: false
-                }, {
-                    name: "Started at:",
-                    value: `<t:${(Date.now()/1000).toFixed(0)}:t>`,
-                    inline: false
-                }])
-                .setThumbnail({
-                    url: `https://minotar.net/helm/${ingameName}/600.png`
-                })
-            ])
-        )
     }
 }
 

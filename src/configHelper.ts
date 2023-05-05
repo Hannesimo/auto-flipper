@@ -3,8 +3,8 @@ const filePath = './config.toml'
 var json2toml = require('json2toml')
 var toml = require('toml')
 let config: Config = {
-    INGAME_NAME: null,
-    WEBHOOK_URL: null,
+    INGAME_NAME: '',
+    WEBHOOK_URL: '',
     SESSIONS: {}
 }
 

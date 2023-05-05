@@ -42,8 +42,10 @@ To run or build the code, you need Node and npm.
 
 -   To run it just execute `npm install` followed by `npm run start`<br/><br/>
 -   To build the executables run `npm install` followed by:
-    - Windows: `npm run build-executables-win`
-    - Linux: `npm run build-executables-linux`
+    -   Windows: `npm run build-executables-win`
+    -   Linux: `npm run build-executables-linux`
+
+NOTE: You only need this if you want to build the code yourself. If you are using a executable, you can ignore the node steps.
 
 ## How does it work
 
@@ -65,6 +67,11 @@ The bot creates a config.toml file after the first start. This file contains con
 -   1 core of your CPU
 -   Stable ping, preferably under 200ms - it measures your ping and sends actions ahead of time to arrive as close on time as possible
 -   Some paid plan from sky.coflnet.com
+
+## Webhook
+
+You can add a Webhook URL into your config.toml to get different notifications (init, selling, purchasing, relisting).
+Just add the line `WEBHOOK_URL = "YOUR_URL"` into your config. Make sure to place it above the sessions part (will be created automatically on your first start).
 
 ## Logging
 
