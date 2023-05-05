@@ -41,7 +41,7 @@ For Mac/Linux just execute the corresponding files as usual. I am not aware of s
 To run or build the code, you need Node and npm.
 
 -   To run it just execute `npm install` followed by `npm run start`<br/><br/>
--   To build the executables run `npm install` followed by:
+-   To build the executables the following command for the following OS:
     -   Windows: `npm run build-executables-win`
     -   Linux: `npm run build-executables-linux`
 

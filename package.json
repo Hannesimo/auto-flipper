@@ -1,19 +1,19 @@
 {
   "name": "baf",
-  "version": "1.0.4",
+  "version": "1.0.6",
   "description": "",
   "main": "index.ts",
   "scripts": {
     "start": "tsc && node ./build/BAF.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build-executables-win": "tsc && pkg ./build/BAF.js --targets node16-win-x64,node16-macos-x64,node16-linux-x64 --output ./executables/BAF-%npm_package_version%",
-    "build-executables-linux": "tsc && pkg ./build/BAF.js --targets node16-win-x64,node16-macos-x64,node16-linux-x64 --output ./executables/BAF-${npm_package_version}"
+    "build-executables-win": "npm install && tsc && pkg ./build/BAF.js --targets node16-win-x64,node16-macos-x64,node16-linux-x64 --output ./executables/BAF-%npm_package_version%",
+    "build-executables-linux": "npm install && tsc && pkg ./build/BAF.js --targets node16-win-x64,node16-macos-x64,node16-linux-x64 --output ./executables/BAF-${npm_package_version}"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "axios": "^1.4.0",
+    "axios": "^0.27.2",
     "dotenv": "^16.0.3",
     "json2toml": "^4.0.1",
     "mineflayer": "^4.8.1",

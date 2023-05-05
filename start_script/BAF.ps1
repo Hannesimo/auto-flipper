@@ -1,7 +1,8 @@
 $BafPath = "${env:APPDATA}\BAF"
 $Response = Invoke-WebRequest -URI "https://api.github.com/repos/Hannesimo/auto-flipper/releases" -UseBasicParsing
 $Releases = ConvertFrom-Json $Response.Content
-$Response = Invoke-WebRequest -URI $Releases.assets_url -UseBasicParsing
+
+$Response = Invoke-WebRequest -URI $Releases[0].assets_url -UseBasicParsing
 $Assets = ConvertFrom-Json $Response.Content
 
 $NewestVersion = $Releases[0].tag_name
