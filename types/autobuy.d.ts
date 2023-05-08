@@ -5,6 +5,7 @@ interface SellData {
     slot: number
     duration: number
     itemName: string
+    id: string
 }
 
 interface TradeData {

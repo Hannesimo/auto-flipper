@@ -90,12 +90,14 @@ async function sellHandler(data: SellData, bot: MyBot, sellWindow, removeEventLi
                 log('No item at index ' + itemSlot + ' found -> probably already sold')
                 return
             }
-            log(sellWindow.slots[itemSlot])
-            let itemName = sellWindow.slots[itemSlot]?.displayName
-            if (itemName !== data.itemName) {
+
+            let id = sellWindow.slots[itemSlot]?.nbt?.value?.ExtraAttributes?.value?.id?.value
+            let uuid = sellWindow.slots[itemSlot]?.nbt?.value?.ExtraAttributes?.value?.uuid?.value
+            if (data.id !== id && data.id !== uuid) {
                 bot.state = null
                 removeEventListenerCallback()
-                log('Item at index ' + itemSlot + ' "' + itemName + '" does not match item that is supposed to be sold: "' + data.itemName + '" -> dont sell')
+                log(sellWindow.slots[itemSlot])
+                log('Item at index ' + itemSlot + '" does not match item that is supposed to be sold: "' + data.id + '" -> dont sell')
                 return
             }
 

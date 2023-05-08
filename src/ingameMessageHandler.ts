@@ -94,6 +94,13 @@ function claimPurchased(bot: MyBot) {
                 clickWindow(bot, slotToClick)
 
                 bot.once('windowOpen', window => {
+                    if(!window.slots[31]){
+                        log("Weird error trying to claim purchased auction")
+                        log(window.slots)
+                        bot.removeAllListeners('windowOpen')
+                        bot.state = null
+                        return
+                    }
                     if (window.slots[31].name.includes('gold_block')) {
                         log('Claiming purchased auction...')
                         clickWindow(bot, 31)
