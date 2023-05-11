@@ -1,40 +1,32 @@
 import { Client, PacketMeta } from 'minecraft-protocol'
-import { getConfigProperty } from './configHelper'
 import winston from 'winston'
 
 let logger: winston.Logger
 
 export function initLogger() {
     const loggerConfig = {
-        format: winston.format.json(),
+        format: winston.format.combine(winston.format.timestamp(), winston.format.prettyPrint()),
         transports: [],
-        exceptionHandlers: [
-            new winston.transports.File({ filename: 'log.txt', format: winston.format.combine(winston.format.timestamp(), winston.format.json()) })
-        ],
-        rejectionHandlers: [
-            new winston.transports.File({ filename: 'log.txt', format: winston.format.combine(winston.format.timestamp(), winston.format.json()) })
-        ]
+        exceptionHandlers: [new winston.transports.File({ filename: 'log.txt', dirname: __dirname })],
+        rejectionHandlers: [new winston.transports.File({ filename: 'log.txt', dirname: __dirname })]
     }
-    if (getConfigProperty('LOG_TO_FILE') !== undefined) {
-        loggerConfig.transports.push(
-            new winston.transports.File({
-                filename: 'log.txt',
-                level: getConfigProperty('LOG_TO_FILE'),
-                format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
-                options: {
-                    flags: 'w'
-                }
-            })
-        )
-    }
-    if (getConfigProperty('LOG_TO_CONSOLE') !== undefined) {
-        loggerConfig.transports.push(
-            new winston.transports.Console({
-                level: getConfigProperty('LOG_TO_CONSOLE'),
-                format: winston.format.combine(winston.format.timestamp(), winston.format.json())
-            })
-        )
-    }
+    loggerConfig.transports.push(
+        new winston.transports.File({
+            dirname: __dirname,
+            filename: 'log.txt',
+            level: 'debug',
+            format: winston.format.combine(winston.format.timestamp(), winston.format.prettyPrint()),
+            options: {
+                flags: 'w'
+            }
+        })
+    )
+    loggerConfig.transports.push(
+        new winston.transports.Console({
+            format: winston.format.combine(winston.format.timestamp(), winston.format.prettyPrint()),
+            level: 'none'
+        })
+    )
     logger = winston.createLogger(loggerConfig)
 }
 
@@ -88,6 +80,7 @@ export function logPacket(packet: any, packetMeta: PacketMeta, toServer: boolean
     if (packetMeta.name !== 'window_click' && packetMeta.name !== 'open_window' && packetMeta.name !== 'window_items') {
         return
     }
+
     logger.debug(`${toServer ? 'toServer' : 'toClient'}: ${JSON.stringify(packet)}`)
     logger.debug(`${JSON.stringify(packetMeta)}`)
 }

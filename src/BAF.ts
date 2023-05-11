@@ -13,9 +13,9 @@ import { getConfigProperty, initConfigHelper, updatePersistentConfigProperty } f
 import { getSessionId } from './coflSessionManager'
 import { sendWebhookInitialized } from './webhookHandler'
 import { setupConsoleInterface } from './consoleHandler'
+import { initAFKHandler } from './AFKHandler'
 const WebSocket = require('ws')
 var prompt = require('prompt-sync')()
-require('dotenv').config()
 initConfigHelper()
 initLogger()
 const version = '1.5.0-af'
@@ -83,8 +83,10 @@ async function onWebsocketMessage(msg) {
             flipHandler(bot, data)
             break
         case 'chatMessage':
-            for (let da of [...(data as TextMessageData[])]) {
-                printMcChatToConsole(da.text)
+            if (getConfigProperty('USE_COFL_CHAT')) {
+                for (let da of [...(data as TextMessageData[])]) {
+                    printMcChatToConsole(da.text)
+                }
             }
             break
         case 'writeToChat':
@@ -129,6 +131,7 @@ async function onScoreboardChanged(scoreboard: ScoreBoard) {
     if (scoreboard.title.includes('SKYBLOCK')) {
         bot.removeListener('scoreboardTitleChanged', onScoreboardChanged)
         log('Joined SkyBlock')
+        initAFKHandler(bot)
         setTimeout(() => {
             log('Waited for grace period to end. Flips can now be bought.')
             bot.state = null

@@ -1,6 +1,6 @@
 {
   "name": "baf",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "",
   "main": "index.ts",
   "scripts": {
@@ -14,7 +14,6 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^0.27.2",
-    "dotenv": "^16.0.3",
     "json2toml": "^4.0.1",
     "mineflayer": "^4.8.1",
     "prompt-sync": "^4.2.0",

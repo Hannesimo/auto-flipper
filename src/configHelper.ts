@@ -1,10 +1,11 @@
 let fs = require('fs')
-const filePath = './config.toml'
+const filePath = `${__dirname}/config.toml`
 var json2toml = require('json2toml')
 var toml = require('toml')
 let config: Config = {
     INGAME_NAME: '',
     WEBHOOK_URL: '',
+    USE_COFL_CHAT: true,
     SESSIONS: {}
 }
 
@@ -13,7 +14,21 @@ json2toml({ simple: true })
 export function initConfigHelper() {
     return new Promise(() => {
         if (fs.existsSync(filePath)) {
-            config = toml.parse(fs.readFileSync(filePath, { encoding: 'utf8', flag: 'r' }))
+            let existingConfig = toml.parse(fs.readFileSync(filePath, { encoding: 'utf8', flag: 'r' }))
+
+            // add new default values to existing config if new property was added in newer version
+            let hadChange = false
+            Object.keys(config).forEach(key => {
+                if (existingConfig[key] === undefined) {
+                    existingConfig[key] = config[key]
+                    hadChange = true
+                }
+            })
+            if (hadChange) {
+                fs.writeFileSync(filePath, json2toml(existingConfig))
+            }
+
+            config = existingConfig
         }
     })
 }
@@ -24,5 +39,5 @@ export function updatePersistentConfigProperty(property: string, value: any) {
 }
 
 export function getConfigProperty(property: string): any {
-    return config[property] || process.env[property]
+    return config[property]
 }

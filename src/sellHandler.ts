@@ -62,13 +62,6 @@ async function sellHandler(data: SellData, bot: MyBot, sellWindow, removeEventLi
                 }
                 clickSlot = item.slot
             }
-            if (item && item.type === 380 && (item.nbt as any).value?.display?.value?.Name?.value?.toString().includes('Claim All')) {
-                log('Found cauldron to claim all sold auctions -> clicking index ' + item.slot)
-                clickWindow(bot, item.slot)
-                removeEventListenerCallback()
-                bot.state = null
-                return
-            }
         }
         clickWindow(bot, clickSlot)
     }
@@ -139,7 +132,6 @@ async function sellHandler(data: SellData, bot: MyBot, sellWindow, removeEventLi
         setPrice = false
         durationSet = false
         bot.state = null
-
         sendWebhookItemListed(data.itemName, numberWithThousandsSeparators(data.price), data.duration)
     }
 }

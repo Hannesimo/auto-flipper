@@ -36,7 +36,6 @@ export function registerIngameMessageHandler(bot: MyBot, wss: WebSocket) {
                     text.split('[Auction] ')[1].split(' bought ')[0]
                 )
             }
-
             if (bot.privacySettings && bot.privacySettings.chatRegex.test(text)) {
                 wss.send(
                     JSON.stringify({
@@ -80,22 +79,23 @@ function claimPurchased(bot: MyBot) {
                 for (let i = 0; i < window.slots.length; i++) {
                     const slot = window.slots[i]
                     if (slot?.type === 380 && (slot?.nbt as any)?.value?.display?.value?.Name?.value?.toString().includes('Claim All')) {
-                        log('Found cauldron to claim all sold auctions -> clicking index ' + i)
+                        log('Found cauldron to claim all purchased auctions -> clicking index ' + i)
                         clickWindow(bot, i)
                         bot.removeAllListeners('windowOpen')
                         bot.state = null
                         return
                     }
+
                     if ((slot?.nbt as any)?.value?.display?.value?.Lore?.value?.value?.toString().includes('§7Status: §aSold!')) {
-                        log('Found claimable auction. Gonna click index ' + i)
+                        log('Found claimable purchased auction. Gonna click index ' + i)
                         slotToClick = i
                     }
                 }
                 clickWindow(bot, slotToClick)
 
                 bot.once('windowOpen', window => {
-                    if(!window.slots[31]){
-                        log("Weird error trying to claim purchased auction")
+                    if (!window.slots[31]) {
+                        log('Weird error trying to claim purchased auction')
                         log(window.slots)
                         bot.removeAllListeners('windowOpen')
                         bot.state = null
@@ -153,6 +153,14 @@ async function claimHandler(bot: MyBot, window, itemName: string, removeEventLis
             if (item?.nbt?.value?.display?.value?.Lore && JSON.stringify(item.nbt.value.display.value.Lore).includes('Sold for')) {
                 clickSlot = item.slot
             }
+            if (item && item.type === 380 && (item.nbt as any).value?.display?.value?.Name?.value?.toString().includes('Claim All')) {
+                log(item)
+                log('Found cauldron to claim all sold auctions -> clicking index ' + item.slot)
+                clickWindow(bot, item.slot)
+                removeEventListenerCallback()
+                bot.state = null
+                return
+            }
         })
 
         log('Clicking auction to claim, index: ' + clickSlot)
@@ -162,7 +170,7 @@ async function claimHandler(bot: MyBot, window, itemName: string, removeEventLis
     }
     if (title == 'BIN Auction View') {
         if (window.slots[31].name.includes('gold_block')) {
-            log('New BIN Auction View, clicking slot 31, claiming purchased auction')
+            log('Clicking slot 31, claiming purchased auction')
             clickWindow(bot, 31)
         }
         removeEventListenerCallback()

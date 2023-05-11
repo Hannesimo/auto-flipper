@@ -5,6 +5,7 @@ interface SESSIONS {
 interface Config {
     INGAME_NAME: string
     WEBHOOK_URL: string
+    USE_COFL_CHAT: boolean
     SESSIONS: SESSIONS
 }
 
