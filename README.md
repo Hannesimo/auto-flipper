@@ -55,6 +55,9 @@ NOTE: You only need this if you want to build the code yourself. If you are usin
 -   After that, it automatically buys and sells flips
 -   => Profit
 
+-- Note
+-BAF will try to sell everything it can find. It won't stop on your equipment
+
 ## Configuration
 
 The bot creates a config.toml file after the first start. This file contains configuration properties for the bot. Currently, only the ingame username is stored, so you don't need to enter it every time. I may add more configurations in the future. The Cofl configurations apply as normal.
