@@ -1,18 +1,19 @@
 import { Client, PacketMeta } from 'minecraft-protocol'
 import winston from 'winston'
-
+const path = require('path')
+let logFilePath = path.join(process.argv[0], '..')
 let logger: winston.Logger
 
 export function initLogger() {
     const loggerConfig = {
         format: winston.format.combine(winston.format.timestamp(), winston.format.prettyPrint()),
         transports: [],
-        exceptionHandlers: [new winston.transports.File({ filename: 'log.txt', dirname: __dirname })],
-        rejectionHandlers: [new winston.transports.File({ filename: 'log.txt', dirname: __dirname })]
+        exceptionHandlers: [new winston.transports.File({ filename: 'log.txt', dirname: logFilePath })],
+        rejectionHandlers: [new winston.transports.File({ filename: 'log.txt', dirname: logFilePath })]
     }
     loggerConfig.transports.push(
         new winston.transports.File({
-            dirname: __dirname,
+            dirname: logFilePath,
             filename: 'log.txt',
             level: 'debug',
             format: winston.format.combine(winston.format.timestamp(), winston.format.prettyPrint()),

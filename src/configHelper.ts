@@ -1,5 +1,6 @@
 let fs = require('fs')
-const filePath = `${__dirname}/config.toml`
+const path = require('path')
+const filePath = path.join(process.argv[0], '..', 'config.toml')
 var json2toml = require('json2toml')
 var toml = require('toml')
 let config: Config = {
@@ -12,25 +13,23 @@ let config: Config = {
 json2toml({ simple: true })
 
 export function initConfigHelper() {
-    return new Promise(() => {
-        if (fs.existsSync(filePath)) {
-            let existingConfig = toml.parse(fs.readFileSync(filePath, { encoding: 'utf8', flag: 'r' }))
+    if (fs.existsSync(filePath)) {
+        let existingConfig = toml.parse(fs.readFileSync(filePath, { encoding: 'utf8', flag: 'r' }))
 
-            // add new default values to existing config if new property was added in newer version
-            let hadChange = false
-            Object.keys(config).forEach(key => {
-                if (existingConfig[key] === undefined) {
-                    existingConfig[key] = config[key]
-                    hadChange = true
-                }
-            })
-            if (hadChange) {
-                fs.writeFileSync(filePath, json2toml(existingConfig))
+        // add new default values to existing config if new property was added in newer version
+        let hadChange = false
+        Object.keys(config).forEach(key => {
+            if (existingConfig[key] === undefined) {
+                existingConfig[key] = config[key]
+                hadChange = true
             }
-
-            config = existingConfig
+        })
+        if (hadChange) {
+            fs.writeFileSync(filePath, json2toml(existingConfig))
         }
-    })
+
+        config = existingConfig
+    }
 }
 
 export function updatePersistentConfigProperty(property: string, value: any) {
