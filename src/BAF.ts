@@ -128,7 +128,7 @@ async function onWebsocketMessage(msg) {
 }
 
 async function onScoreboardChanged(scoreboard: ScoreBoard) {
-    if (scoreboard.title.includes('SKYBLOCK')) {
+    if (scoreboard.title.replace(/§[0-9a-fk-or]/gi, '').includes('SKYBLOCK')) {
         bot.removeListener('scoreboardTitleChanged', onScoreboardChanged)
         log('Joined SkyBlock')
         initAFKHandler(bot)

@@ -14,16 +14,15 @@ export function initAFKHandler(bot: MyBot) {
             return
         }
 
-        let scoreboard = bot.scoreboard.sidebar.items.map(item => item.displayName.getText(null).replace(item.name, ''))
-
-        if (!bot.scoreboard || !bot.scoreboard.sidebar.title || !bot.scoreboard.sidebar.title.includes('SKYBLOCK')) {
-            log('Bot seems to be in lobby. Sending "/play sb"')
+        if (!bot.scoreboard.sidebar.title.replace(/§[0-9a-fk-or]/gi, '').includes('SKYBLOCK')) {
+            log(`Bot seems to be in lobby (Sidebar title = ${bot.scoreboard.sidebar.title}). Sending "/play sb"`)
             printMcChatToConsole('§f[§4BAF§f]: §fYou seem to be in the lobby.')
             printMcChatToConsole('§f[§4BAF§f]: §fWarping back into skyblock...')
             bot.chat('/play sb')
             return
         }
 
+        let scoreboard = bot.scoreboard.sidebar.items.map(item => item.displayName.getText(null).replace(item.name, ''))
         if (!scoreboard.find(e => e.includes('Your Island'))) {
             log('Bot is not on island. Warping back')
             log(bot.scoreboard)
