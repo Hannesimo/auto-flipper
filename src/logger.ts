@@ -1,7 +1,8 @@
 import { Client, PacketMeta } from 'minecraft-protocol'
 import winston from 'winston'
-const path = require('path')
-let logFilePath = path.join(process.argv[0], '..')
+let path = require('path')
+let logFilePath = path.join((process as any).pkg ? process.argv[0] : process.argv[1], '..')
+
 let logger: winston.Logger
 
 export function initLogger() {

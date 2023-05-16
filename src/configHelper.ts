@@ -1,6 +1,7 @@
 let fs = require('fs')
-const path = require('path')
-const filePath = path.join(process.argv[0], '..', 'config.toml')
+let path = require('path')
+let filePath = path.join((process as any).pkg ? process.argv[0] : process.argv[1], '..', 'config.toml')
+
 var json2toml = require('json2toml')
 var toml = require('toml')
 let config: Config = {
