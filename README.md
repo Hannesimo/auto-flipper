@@ -47,6 +47,15 @@ To run or build the code, you need Node and npm.
 
 NOTE: You only need this if you want to build the code yourself. If you are using a executable, you can ignore the node steps.
 
+### Linux
+To execute on linux use the following (and follow the input requests)
+```bash
+version=1.0.11
+wget -c https://github.com/Hannesimo/auto-flipper/releases/download/$version/BAF-$version-linux
+chmod +x BAF-$version-linux 
+./BAF-$version-linux
+```
+
 ## How does it work
 
 -   On the first start, enter your Ingame name, this is needed for the authentication
