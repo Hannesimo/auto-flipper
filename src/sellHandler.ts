@@ -116,6 +116,40 @@ async function sellHandler(data: SellData, bot: MyBot, sellWindow, removeEventLi
         } else if (setPrice && !durationSet) {
             clickWindow(bot, 33)
         } else if (setPrice && durationSet) {
+
+            const item = sellWindow.slots[29]
+            const name = <string> item.nbt.value?.display?.value?.Name?.value
+            const lore = <string[]> item.nbt?.value?.display?.value?.Lore
+
+            const fail = () => {
+                log('Something went wrong while listing an item')
+
+                clickWindow(bot, 13) // Take the item out of the window
+
+                removeEventListenerCallback()
+                setPrice = false
+                durationSet = false
+                bot.state = null
+            }
+
+            if(!name || !lore) {
+                fail()
+                return
+            }
+
+            const stripLine = (txt: string) => txt.replace(/§./g, '')
+            let priceLine = lore.find(el => stripLine(el).includes('Item price'))
+            if(!priceLine) {
+                fail()
+                return
+            }
+            priceLine = priceLine.split(': ')[1].split(' coins')[1]
+            const p = Number(priceLine.replace(/[,.]/g, ''))
+            if(p !== Math.floor(p)) {
+                fail()
+                return
+            }
+
             clickWindow(bot, 29)
         }
     }
