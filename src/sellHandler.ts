@@ -116,13 +116,8 @@ async function sellHandler(data: SellData, bot: MyBot, sellWindow, removeEventLi
         } else if (setPrice && !durationSet) {
             clickWindow(bot, 33)
         } else if (setPrice && durationSet) {
-
-            const item = sellWindow.slots[29]
-            const name = <string> item.nbt.value?.display?.value?.Name?.value
-            const lore = <string[]> item.nbt?.value?.display?.value?.Lore
-
             const fail = () => {
-                log('Something went wrong while listing an item')
+                console.log('Something went wrong while listing an item')
 
                 clickWindow(bot, 13) // Take the item out of the window
 
@@ -132,7 +127,22 @@ async function sellHandler(data: SellData, bot: MyBot, sellWindow, removeEventLi
                 bot.state = null
             }
 
+            const itemToList = sellWindow.slots[13]
+            const id = itemToList?.nbt?.value?.ExtraAttributes?.value?.id?.value
+            const uuid = itemToList?.nbt?.value?.ExtraAttributes?.value?.uuid?.value
+
+            if(id !== data.id && uuid !== data.id) {
+                console.log('Wrong item in sell slot')
+                fail()
+                return
+            }
+
+            const confirmItem = sellWindow.slots[29]
+            const name = <string> confirmItem?.nbt?.value?.display?.value?.Name?.value
+            const lore = <string[]> confirmItem?.nbt?.value?.display?.value?.Lore?.value?.value
+
             if(!name || !lore) {
+                console.log('Name or lore not present')
                 fail()
                 return
             }
@@ -140,12 +150,17 @@ async function sellHandler(data: SellData, bot: MyBot, sellWindow, removeEventLi
             const stripLine = (txt: string) => txt.replace(/§./g, '')
             let priceLine = lore.find(el => stripLine(el).includes('Item price'))
             if(!priceLine) {
+                console.log('Price not present')
                 fail()
                 return
             }
-            priceLine = priceLine.split(': ')[1].split(' coins')[1]
-            const p = Number(priceLine.replace(/[,.]/g, ''))
-            if(p !== Math.floor(p)) {
+            priceLine = stripLine(priceLine)
+
+            priceLine = priceLine.split(': ')[1].split(' coins')[0]
+            priceLine = priceLine.replace(/[,.]/g, '')
+            const p = Number(priceLine)
+            if(p !== Math.floor(data.price)) {
+                console.log('Wrong price')
                 fail()
                 return
             }
