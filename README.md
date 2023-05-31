@@ -1,7 +1,7 @@
 Join the official Discord server:
 https://www.discord.gg/eYRBsaECzY
 
-# BAF
+# BAF 
 
 You found the Best Auto Flipper (BAF) for hypixel Skyblock
 Note: This code is a headless (no user interface) Minecraft client and has features sending custom packages to the server to compete with other macroers. This is against the Hypixel Terms of Service.
