@@ -23,6 +23,7 @@ interface Flip {
     startingBid: number
     purchaseAt: Date
     itemName: string
+    target: number
 }
 
 interface TextMessageData {

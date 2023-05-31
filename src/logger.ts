@@ -1,5 +1,7 @@
 import { Client, PacketMeta } from 'minecraft-protocol'
 import winston from 'winston'
+import { getConfigProperty } from './configHelper'
+let fs = require('fs')
 let path = require('path')
 let logFilePath = path.join((process as any).pkg ? process.argv[0] : process.argv[1], '..')
 
@@ -37,54 +39,19 @@ export function log(string: any, level?: string) {
 }
 
 export function logPacket(packet: any, packetMeta: PacketMeta, toServer: boolean) {
-    if (!logger.isSillyEnabled()) {
+    if (!getConfigProperty('LOG_PACKAGES')) {
         return
     }
-    let hidePackets = [
-        'world_particles',
-        'entity_teleport',
-        'scoreboard_team',
-        'keep_alive',
-        'transaction',
-        'flying',
-        'position',
-        'look',
-        'update_time',
-        'entity_velocity',
-        'rel_entity_move',
-        'entity_metadata',
-        'map_chunk',
-        'spawn_entity',
-        'update_attributes',
-        'entity_equipment',
-        'named_entity_spawn',
-        'scoreboard_objective',
-        'animation',
-        'player_info',
-        'update_sign',
-        'tile_entity_data',
-        'entity_look',
-        'named_sound_effect',
-        'update_health',
-        'scoreboard_score',
-        'scoreboard_display_objective',
-        'statistics',
-        'respawn',
-        'spawn_entity_living',
-        'entity_destroy',
-        'entity_effect',
-        'block_change'
-    ]
 
-    if (hidePackets.indexOf(packetMeta.name) !== -1) {
-        return
-    }
     if (packetMeta.name !== 'window_click' && packetMeta.name !== 'open_window' && packetMeta.name !== 'window_items') {
         return
     }
 
-    logger.debug(`${toServer ? 'toServer' : 'toClient'}: ${JSON.stringify(packet)}`)
-    logger.debug(`${JSON.stringify(packetMeta)}`)
+    fs.writeFileSync(
+        'packets.log',
+        `${toServer ? 'toServer' : 'toClient'}: ${JSON.stringify(packet)}\n${JSON.stringify(packetMeta)}\n----------------------------------------------\n`,
+        { flag: 'a+' }
+    )
 }
 
 export function printMcChatToConsole(string: string) {

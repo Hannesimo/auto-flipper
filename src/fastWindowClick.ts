@@ -1,5 +1,5 @@
 import { Client } from 'minecraft-protocol'
-import { log, logPacket } from './logger'
+import { log, logPacket, printMcChatToConsole } from './logger'
 import { numberWithThousandsSeparators } from './utils'
 
 let windowClicker
@@ -87,6 +87,7 @@ export function createFastWindowClicker(client: Client) {
                     }
                 }
             })
+            actionCounter += 1
         },
         // click confirm in window "Confirm Purchase"
         clickConfirm: function (price: number, itemName: string, windowId: number) {
@@ -113,7 +114,7 @@ export function createFastWindowClicker(client: Client) {
                                         value: {
                                             type: 'string',
                                             value: [
-                                                `┬º7Purchasing: ┬ºa┬ºf┬º9${itemName}`,
+                                                `┬º7Purchasing: ┬ºa┬ºf┬º9${itemName.replace(/§/g, '┬º')}`,
                                                 `┬º7Cost: ┬º6${numberWithThousandsSeparators(Math.floor(price))} coins`
                                             ]
                                         }
@@ -128,9 +129,6 @@ export function createFastWindowClicker(client: Client) {
             })
             actionCounter += 1
         },
-        onAuctionWasAlreadyBought: function () {
-            log('Auction was already bought')
-        },
         getLastWindowId: function () {
             return lastWindowId
         }
@@ -142,7 +140,11 @@ export function createFastWindowClicker(client: Client) {
         }
         if (packetMeta.name === 'window_items') {
             if (packet.items[31]?.nbtData?.value?.display?.value?.Lore?.value?.value?.toString()?.includes('Someone else purchased the item!')) {
-                windowClicker.onAuctionWasAlreadyBought()
+                let itemName = null
+                if (packet.items[13] && packet.items[13].nbtData?.value?.display?.value?.Name?.value) {
+                    itemName = packet.items[13].nbtData?.value?.display?.value?.Name?.value
+                }
+                printMcChatToConsole(`§f[§4BAF§f]: §fAuction${itemName ? ` (${itemName}§f)` : ''} §fwas already purchased by someone else...`)
             }
         }
         logPacket(packet, packetMeta, false)

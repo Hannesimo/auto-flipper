@@ -1,6 +1,6 @@
 import { MyBot, SellData } from '../types/autobuy'
-import { log } from './logger'
-import { clickWindow, getWindowTitle, numberWithThousandsSeparators } from './utils'
+import { log, printMcChatToConsole } from './logger'
+import { clickWindow, getWindowTitle, numberWithThousandsSeparators, removeMinecraftColorCodes } from './utils'
 import { sendWebhookItemListed } from './webhookHandler'
 
 let setPrice = false
@@ -28,7 +28,7 @@ export async function onWebsocketCreateAuction(bot: MyBot, data: SellData) {
 
 async function sellItem(data: SellData, bot: MyBot) {
     let timeout = setTimeout(() => {
-        log('Seems something went wrong while selling. Removing lock')
+        log('Seems something went wrong while selling. Removing lock', 'warn')
         bot.state = null
         bot.removeAllListeners('windowOpen')
     }, 10000)
@@ -80,7 +80,7 @@ async function sellHandler(data: SellData, bot: MyBot, sellWindow, removeEventLi
             if (!sellWindow.slots[itemSlot]) {
                 bot.state = null
                 removeEventListenerCallback()
-                log('No item at index ' + itemSlot + ' found -> probably already sold')
+                log('No item at index ' + itemSlot + ' found -> probably already sold', 'warn')
                 return
             }
 
@@ -89,8 +89,8 @@ async function sellHandler(data: SellData, bot: MyBot, sellWindow, removeEventLi
             if (data.id !== id && data.id !== uuid) {
                 bot.state = null
                 removeEventListenerCallback()
-                log(sellWindow.slots[itemSlot])
-                log('Item at index ' + itemSlot + '" does not match item that is supposed to be sold: "' + data.id + '" -> dont sell')
+                log('Item at index ' + itemSlot + '" does not match item that is supposed to be sold: "' + data.id + '" -> dont sell', 'warn')
+                log(JSON.stringify(sellWindow.slots[itemSlot]))
                 return
             }
 
@@ -116,6 +116,39 @@ async function sellHandler(data: SellData, bot: MyBot, sellWindow, removeEventLi
         } else if (setPrice && !durationSet) {
             clickWindow(bot, 33)
         } else if (setPrice && durationSet) {
+            const resetAndTakeOutItem = () => {
+                clickWindow(bot, 13) // Take the item out of the window
+                removeEventListenerCallback()
+                setPrice = false
+                durationSet = false
+                bot.state = null
+            }
+
+            try {
+                const lore = <string[]>sellWindow.slots[29]?.nbt?.value?.display?.value?.Lore?.value?.value
+                let priceLine = lore.find(el => removeMinecraftColorCodes(el).includes('Item price'))
+                if (!priceLine) {
+                    log('Price not present', 'error')
+                    log(sellWindow.slots[29])
+                    resetAndTakeOutItem()
+                    return
+                }
+                priceLine = removeMinecraftColorCodes(priceLine)
+
+                priceLine = priceLine.split(': ')[1].split(' coins')[0]
+                priceLine = priceLine.replace(/[,.]/g, '')
+
+                if (Number(priceLine) !== Math.floor(data.price)) {
+                    log('Price is not the one that should be there', 'error')
+                    log(data)
+                    log(sellWindow.slots[29])
+                    resetAndTakeOutItem()
+                    return
+                }
+            } catch (e) {
+                log('Checking if correct price was set in sellHandler through an error: ' + JSON.stringify(e), 'error')
+            }
+
             clickWindow(bot, 29)
         }
     }
@@ -132,6 +165,7 @@ async function sellHandler(data: SellData, bot: MyBot, sellWindow, removeEventLi
         setPrice = false
         durationSet = false
         bot.state = null
+        printMcChatToConsole(`§f[§4BAF§f]: §fItem listed: ${data.itemName} for ${numberWithThousandsSeparators(data.price)} coins`)
         sendWebhookItemListed(data.itemName, numberWithThousandsSeparators(data.price), data.duration)
     }
 }

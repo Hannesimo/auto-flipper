@@ -2,7 +2,7 @@ import { ScoreBoard } from 'mineflayer'
 import { createBot } from 'mineflayer'
 import { createFastWindowClicker } from './fastWindowClick'
 import { addLoggerToClientWriteFunction, initLogger, log, printMcChatToConsole } from './logger'
-import { clickWindow, sleep } from './utils'
+import { clickWindow, isCoflChatMessage, removeMinecraftColorCodes, sleep } from './utils'
 import { onWebsocketCreateAuction } from './sellHandler'
 import { tradePerson } from './tradeHandler'
 import { swapProfile } from './swapProfileHandler'
@@ -39,7 +39,7 @@ bot.setMaxListeners(0)
 bot.state = 'gracePeriod'
 createFastWindowClicker(bot._client)
 
-if (getConfigProperty('LOG_PACKAGES') === 'true') {
+if (getConfigProperty('LOG_PACKAGES')) {
     addLoggerToClientWriteFunction(bot._client)
 }
 
@@ -74,31 +74,42 @@ function connectWebsocket() {
 async function onWebsocketMessage(msg) {
     let message = JSON.parse(msg.data)
     let data = JSON.parse(message.data)
-    if (message.type !== 'chatMessage') {
-        log(message, 'debug')
-    }
 
     switch (message.type) {
         case 'flip':
+            log(message, 'debug')
             flipHandler(bot, data)
             break
         case 'chatMessage':
-            if (getConfigProperty('USE_COFL_CHAT')) {
-                for (let da of [...(data as TextMessageData[])]) {
+            for (let da of [...(data as TextMessageData[])]) {
+                let isCoflChat = isCoflChatMessage(da.text)
+                if (!isCoflChat) {
+                    log(message, 'debug')
+                }
+                if (getConfigProperty('USE_COFL_CHAT') || !isCoflChat) {
                     printMcChatToConsole(da.text)
                 }
             }
             break
         case 'writeToChat':
-            printMcChatToConsole((data as TextMessageData).text)
+            let isCoflChat = isCoflChatMessage(data.text)
+            if (!isCoflChat) {
+                log(message, 'debug')
+            }
+            if (getConfigProperty('USE_COFL_CHAT') || !isCoflChat) {
+                printMcChatToConsole((data as TextMessageData).text)
+            }
             break
         case 'swapProfile':
+            log(message, 'debug')
             swapProfile(bot, data)
             break
         case 'createAuction':
+            log(message, 'debug')
             onWebsocketCreateAuction(bot, data)
             break
         case 'trade':
+            log(message, 'debug')
             tradePerson(bot, wss, data)
             break
         case 'tradeResponse':
@@ -118,9 +129,11 @@ async function onWebsocketMessage(msg) {
             )
             break
         case 'execute':
+            log(message, 'debug')
             bot.chat(data)
             break
         case 'privacySettings':
+            log(message, 'debug')
             data.chatRegex = new RegExp(data.chatRegex)
             bot.privacySettings = data
             break
@@ -128,7 +141,7 @@ async function onWebsocketMessage(msg) {
 }
 
 async function onScoreboardChanged(scoreboard: ScoreBoard) {
-    if (scoreboard.title.replace(/§[0-9a-fk-or]/gi, '').includes('SKYBLOCK')) {
+    if (removeMinecraftColorCodes(scoreboard.title).includes('SKYBLOCK')) {
         bot.removeListener('scoreboardTitleChanged', onScoreboardChanged)
         log('Joined SkyBlock')
         initAFKHandler(bot)

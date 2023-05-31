@@ -88,6 +88,7 @@ function claimPurchased(bot: MyBot) {
 
                     if ((slot?.nbt as any)?.value?.display?.value?.Lore?.value?.value?.toString().includes('§7Status: §aSold!')) {
                         log('Found claimable purchased auction. Gonna click index ' + i)
+                        log(JSON.stringify(slot))
                         slotToClick = i
                     }
                 }
@@ -95,8 +96,9 @@ function claimPurchased(bot: MyBot) {
 
                 bot.once('windowOpen', window => {
                     if (!window.slots[31]) {
-                        log('Weird error trying to claim purchased auction')
-                        log(window.slots)
+                        log('Weird error trying to claim purchased auction', 'warn')
+                        log(window.title)
+                        log(JSON.stringify(window.slots))
                         bot.removeAllListeners('windowOpen')
                         bot.state = null
                         return

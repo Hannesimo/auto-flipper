@@ -1,14 +1,16 @@
 import { Flip, MyBot } from '../types/autobuy'
+import { getConfigProperty } from './configHelper'
 import { getFastWindowClicker } from './fastWindowClick'
-import { log } from './logger'
-import { sleep } from './utils'
+import { log, printMcChatToConsole } from './logger'
+import { numberWithThousandsSeparators, sleep } from './utils'
 
 export async function flipHandler(bot: MyBot, flip: Flip) {
     flip.purchaseAt = new Date(flip.purchaseAt)
-    log('Flip: ' + JSON.stringify(flip))
 
     if (bot.state) {
-        log('Currently busy with something else (' + bot.state + ') -> not buying flip')
+        setTimeout(() => {
+            flipHandler(bot, flip)
+        }, 1100)
         return
     }
     bot.state = 'purchasing'
@@ -18,11 +20,17 @@ export async function flipHandler(bot: MyBot, flip: Flip) {
             bot.state = null
         }
     }, 2500)
-
-    let lastWindowId = getFastWindowClicker().getLastWindowId()
     let isBed = flip.purchaseAt.getTime() > new Date().getTime()
 
-    let delayUntilBuyStart = isBed ? flip.purchaseAt.getTime() - new Date().getTime() : 0
+    printMcChatToConsole(
+        `§f[§4BAF§f]: §fTrying to purchase flip${isBed ? ' (Bed)' : ''}: ${flip.itemName} §for ${numberWithThousandsSeparators(
+            flip.startingBid
+        )} coins (Target: ${numberWithThousandsSeparators(flip.target)})`
+    )
+
+    let lastWindowId = getFastWindowClicker().getLastWindowId()
+
+    let delayUntilBuyStart = isBed ? flip.purchaseAt.getTime() - new Date().getTime() : getConfigProperty('FLIP_ACTION_DELAY')
 
     bot.lastViewAuctionCommandForPurchase = `/viewauction ${flip.id}`
     bot.chat(bot.lastViewAuctionCommandForPurchase)
@@ -32,7 +40,12 @@ export async function flipHandler(bot: MyBot, flip: Flip) {
     } else {
         getFastWindowClicker().clickPurchase(flip.startingBid, lastWindowId + 1)
     }
+    await sleep(getConfigProperty('FLIP_ACTION_DELAY'))
     getFastWindowClicker().clickConfirm(flip.startingBid, flip.itemName, lastWindowId + 2)
     clearTimeout(timeout)
-    bot.state = null
+
+    // clear timeout after 1sec, so there are no weird overlaps that mess up the windowIds
+    setTimeout(() => {
+        bot.state = null
+    }, 2000)
 }

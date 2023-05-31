@@ -26,3 +26,11 @@ export function numberWithThousandsSeparators(number?: number): string {
     parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',')
     return parts.join('.')
 }
+
+export function isCoflChatMessage(message: string) {
+    return removeMinecraftColorCodes(message).startsWith('[Chat]')
+}
+
+export function removeMinecraftColorCodes(text: string) {
+    return text?.replace(/§[0-9a-fk-or]/gi, '')
+}
