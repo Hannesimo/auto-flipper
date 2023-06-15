@@ -7,6 +7,7 @@ interface Config {
     WEBHOOK_URL: string
     FLIP_ACTION_DELAY: number
     USE_COFL_CHAT: boolean
+    ENABLE_CONSOLE_INPUT: boolean
     SESSIONS: SESSIONS
 }
 

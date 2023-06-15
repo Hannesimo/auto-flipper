@@ -57,62 +57,58 @@ function claimPurchased(bot: MyBot) {
         return
     }
     bot.state = 'claiming'
-
-    let windowHasOpened = false
     bot.chat('/ah')
 
     setTimeout(() => {
-        if (!windowHasOpened) {
-            log('Claiming of purchased auction failed. Removing lock')
-            bot.state = null
-        }
+        log('Claiming of purchased auction failed. Removing lock')
+        bot.state = null
     }, 5000)
 
-    bot.once('windowOpen', window => {
-        windowHasOpened = true
+    bot.on('windowOpen', window => {
         let title = getWindowTitle(window)
+        log('Claiming auction window: ' + title)
 
         if (title.toString().includes('Auction House')) {
             clickWindow(bot, 13)
-            bot.once('windowOpen', window => {
-                let slotToClick = -1
-                for (let i = 0; i < window.slots.length; i++) {
-                    const slot = window.slots[i]
-                    if (slot?.type === 380 && (slot?.nbt as any)?.value?.display?.value?.Name?.value?.toString().includes('Claim All')) {
-                        log('Found cauldron to claim all purchased auctions -> clicking index ' + i)
-                        clickWindow(bot, i)
-                        bot.removeAllListeners('windowOpen')
-                        bot.state = null
-                        return
-                    }
+        }
 
-                    if ((slot?.nbt as any)?.value?.display?.value?.Lore?.value?.value?.toString().includes('§7Status: §aSold!')) {
-                        log('Found claimable purchased auction. Gonna click index ' + i)
-                        log(JSON.stringify(slot))
-                        slotToClick = i
-                    }
-                }
-                clickWindow(bot, slotToClick)
-
-                bot.once('windowOpen', window => {
-                    if (!window.slots[31]) {
-                        log('Weird error trying to claim purchased auction', 'warn')
-                        log(window.title)
-                        log(JSON.stringify(window.slots))
-                        bot.removeAllListeners('windowOpen')
-                        bot.state = null
-                        return
-                    }
-                    if (window.slots[31].name.includes('gold_block')) {
-                        log('Claiming purchased auction...')
-                        clickWindow(bot, 31)
-                    }
+        if (title.toString().includes('Your Bids')) {
+            let slotToClick = -1
+            for (let i = 0; i < window.slots.length; i++) {
+                const slot = window.slots[i]
+                if (slot?.type === 380 && (slot?.nbt as any)?.value?.display?.value?.Name?.value?.toString().includes('Claim All')) {
+                    log('Found cauldron to claim all purchased auctions -> clicking index ' + i)
+                    clickWindow(bot, i)
                     bot.removeAllListeners('windowOpen')
                     bot.state = null
-                })
-            })
+                    return
+                }
+
+                if ((slot?.nbt as any)?.value?.display?.value?.Lore?.value?.value?.toString().includes('§7Status: §aSold!')) {
+                    log('Found claimable purchased auction. Gonna click index ' + i)
+                    log(JSON.stringify(slot))
+                    slotToClick = i
+                }
+            }
+            clickWindow(bot, slotToClick)
         }
-        bot.state = null
+
+        if (title.toString().includes('BIN Auction View')) {
+            if (!window.slots[31]) {
+                log('Weird error trying to claim purchased auction', 'warn')
+                log(window.title)
+                log(JSON.stringify(window.slots))
+                bot.removeAllListeners('windowOpen')
+                bot.state = null
+                return
+            }
+            if (window.slots[31].name.includes('gold_block')) {
+                log('Claiming purchased auction...')
+                clickWindow(bot, 31)
+            }
+            bot.removeAllListeners('windowOpen')
+            bot.state = null
+        }
     })
 }
 
@@ -135,47 +131,43 @@ async function claimSoldItem(bot: MyBot, itemName: string) {
     bot.chat('/ah')
 
     bot.on('windowOpen', window => {
-        claimHandler(bot, window, itemName, () => {
+        let title = getWindowTitle(window)
+        if (title.toString().includes('Auction House')) {
+            clickWindow(bot, 15)
+        }
+        if (title.toString().includes('Manage Auctions')) {
+            log('Claiming sold auction...')
+            let clickSlot
+
+            for (let i = 0; i < window.slots.length; i++) {
+                const item = window.slots[i] as any
+                if (item?.nbt?.value?.display?.value?.Lore && JSON.stringify(item.nbt.value.display.value.Lore).includes('Sold for')) {
+                    clickSlot = item.slot
+                }
+                if (item && item.type === 380 && (item.nbt as any).value?.display?.value?.Name?.value?.toString().includes('Claim All')) {
+                    log(item)
+                    log('Found cauldron to claim all sold auctions -> clicking index ' + item.slot)
+                    clickWindow(bot, item.slot)
+                    clearTimeout(timeout)
+                    bot.removeAllListeners('windowOpen')
+                    bot.state = null
+                    return
+                }
+            }
+
+            log('Clicking auction to claim, index: ' + clickSlot)
+            log(JSON.stringify(window.slots[clickSlot]))
+
+            clickWindow(bot, clickSlot)
+        }
+        if (title == 'BIN Auction View') {
+            if (window.slots[31].name.includes('gold_block')) {
+                log('Clicking slot 31, claiming purchased auction')
+                clickWindow(bot, 31)
+            }
             clearTimeout(timeout)
             bot.removeAllListeners('windowOpen')
-        })
-    })
-}
-
-async function claimHandler(bot: MyBot, window, itemName: string, removeEventListenerCallback: Function) {
-    let title = getWindowTitle(window)
-    if (title.toString().includes('Auction House')) {
-        clickWindow(bot, 15)
-    }
-    if (title.toString().includes('Manage Auctions')) {
-        log('Claiming sold auction...')
-        let clickSlot
-
-        window.slots.forEach(item => {
-            if (item?.nbt?.value?.display?.value?.Lore && JSON.stringify(item.nbt.value.display.value.Lore).includes('Sold for')) {
-                clickSlot = item.slot
-            }
-            if (item && item.type === 380 && (item.nbt as any).value?.display?.value?.Name?.value?.toString().includes('Claim All')) {
-                log(item)
-                log('Found cauldron to claim all sold auctions -> clicking index ' + item.slot)
-                clickWindow(bot, item.slot)
-                removeEventListenerCallback()
-                bot.state = null
-                return
-            }
-        })
-
-        log('Clicking auction to claim, index: ' + clickSlot)
-        log(JSON.stringify(window.slots[clickSlot]))
-
-        clickWindow(bot, clickSlot)
-    }
-    if (title == 'BIN Auction View') {
-        if (window.slots[31].name.includes('gold_block')) {
-            log('Clicking slot 31, claiming purchased auction')
-            clickWindow(bot, 31)
+            bot.state = null
         }
-        removeEventListenerCallback()
-        bot.state = null
-    }
+    })
 }

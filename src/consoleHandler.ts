@@ -2,6 +2,10 @@ import readline from 'readline'
 import { getConfigProperty } from './configHelper'
 
 export function setupConsoleInterface(ws: WebSocket) {
+    if (!getConfigProperty('ENABLE_CONSOLE_INPUT')) {
+        return
+    }
+
     const rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout
@@ -16,7 +20,7 @@ export function setupConsoleInterface(ws: WebSocket) {
             ws.send(
                 JSON.stringify({
                     type: command,
-                    data: `"${splits.join(" ")}"`
+                    data: `"${splits.join(' ')}"`
                 })
             )
         } else {

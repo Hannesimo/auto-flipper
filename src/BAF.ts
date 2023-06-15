@@ -149,6 +149,13 @@ async function onScoreboardChanged(scoreboard: ScoreBoard) {
             log('Waited for grace period to end. Flips can now be bought.')
             bot.state = null
             bot.removeAllListeners('scoreboardTitleChanged')
+
+            wss.send(
+                JSON.stringify({
+                    type: 'uploadScoreboard',
+                    data: JSON.stringify(bot.scoreboard.sidebar.items.map(item => item.displayName.getText(null).replace(item.name, '')))
+                })
+            )
         }, 5500)
         await sleep(2500)
         bot.chat('/is')

@@ -47,5 +47,5 @@ export async function flipHandler(bot: MyBot, flip: Flip) {
     // clear timeout after 1sec, so there are no weird overlaps that mess up the windowIds
     setTimeout(() => {
         bot.state = null
-    }, 2000)
+    }, 1000)
 }
