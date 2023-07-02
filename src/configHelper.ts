@@ -10,7 +10,8 @@ let config: Config = {
     FLIP_ACTION_DELAY: 100,
     ENABLE_CONSOLE_INPUT: true,
     USE_COFL_CHAT: true,
-    SESSIONS: {}
+    SESSIONS: {},
+    USE_WINDOW_SKIPS: false
 }
 
 json2toml({ simple: true })
