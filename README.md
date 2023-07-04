@@ -50,7 +50,7 @@ NOTE: You only need this if you want to build the code yourself. If you are usin
 ### Linux
 To execute on linux use the following (and follow the input requests)
 ```bash
-version=1.1.2
+version=1.1.3
 wget -c https://github.com/Hannesimo/auto-flipper/releases/download/$version/BAF-$version-linux
 chmod +x BAF-$version-linux 
 ./BAF-$version-linux
