@@ -133,10 +133,15 @@ async function sellHandler(data: SellData, bot: MyBot, sellWindow, removeEventLi
                     resetAndTakeOutItem()
                     return
                 }
-                priceLine = removeMinecraftColorCodes(priceLine)
+                if (priceLine.startsWith('{')) {
+                    let obj = JSON.parse(priceLine)
+                    priceLine = obj.extra[1].text.replace(/[,.]/g, '').split(' coins')[0]
+                } else {
+                    priceLine = removeMinecraftColorCodes(priceLine)
 
-                priceLine = priceLine.split(': ')[1].split(' coins')[0]
-                priceLine = priceLine.replace(/[,.]/g, '')
+                    priceLine = priceLine.split(': ')[1].split(' coins')[0]
+                    priceLine = priceLine.replace(/[,.]/g, '')
+                }
 
                 if (Number(priceLine) !== Math.floor(data.price)) {
                     log('Price is not the one that should be there', 'error')

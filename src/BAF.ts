@@ -13,7 +13,7 @@ import { getConfigProperty, initConfigHelper, updatePersistentConfigProperty } f
 import { getSessionId } from './coflSessionManager'
 import { sendWebhookInitialized } from './webhookHandler'
 import { setupConsoleInterface } from './consoleHandler'
-import { initAFKHandler } from './AFKHandler'
+import { initAFKHandler, tryToTeleportToIsland } from './AFKHandler'
 const WebSocket = require('ws')
 var prompt = require('prompt-sync')()
 initConfigHelper()
@@ -31,7 +31,7 @@ const bot: MyBot = createBot({
     username: ingameName,
     auth: 'microsoft',
     logErrors: true,
-    version: '1.8.9',
+    version: '1.17',
     host: 'mc.hypixel.net'
 })
 bot.setMaxListeners(0)
@@ -141,7 +141,7 @@ async function onWebsocketMessage(msg) {
 }
 
 async function onScoreboardChanged(scoreboard: ScoreBoard) {
-    if (removeMinecraftColorCodes(scoreboard.title).includes('SKYBLOCK')) {
+    if (bot.scoreboard.sidebar.items.map(item => item.displayName.getText(null).replace(item.name, '')).find(e => e.includes('Purse:'))) {
         bot.removeListener('scoreboardTitleChanged', onScoreboardChanged)
         log('Joined SkyBlock')
         initAFKHandler(bot)
@@ -158,6 +158,6 @@ async function onScoreboardChanged(scoreboard: ScoreBoard) {
             )
         }, 5500)
         await sleep(2500)
-        bot.chat('/is')
+        tryToTeleportToIsland(bot, 0)
     }
 }

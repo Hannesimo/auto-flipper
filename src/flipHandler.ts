@@ -18,6 +18,7 @@ export async function flipHandler(bot: MyBot, flip: Flip) {
         if (bot.state === 'purchasing') {
             log("Resetting 'bot.state === purchasing' lock")
             bot.state = null
+            bot.removeAllListeners('windowOpen')
         }
     }, 10000)
     let isBed = flip.purchaseAt.getTime() > new Date().getTime()
@@ -56,6 +57,8 @@ async function useRegularPurchase(bot: MyBot) {
         if (title.toString().includes('Confirm Purchase')) {
             await sleep(getConfigProperty('FLIP_ACTION_DELAY'))
             clickWindow(bot, 11)
+            bot.removeAllListeners('windowOpen')
+            bot.state = null
             return
         }
     })

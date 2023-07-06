@@ -8,9 +8,8 @@ export async function sleep(ms: number): Promise<void> {
 
 export function getWindowTitle(window) {
     if (window.title) {
-        // This worked before, for some reason it doesnt anymore
-        // let title = JSON.parse(window.title)['translate']
-        return JSON.parse(window.title)['extra'][0]['text']
+        let parsed = JSON.parse(window.title)
+        return parsed.extra ? parsed['extra'][0]['text'] : parsed.translate
     }
     if (window.windowTitle) {
         return JSON.parse(window.windowTitle)['extra'][0]['text']

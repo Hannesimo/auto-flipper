@@ -76,15 +76,15 @@ function claimPurchased(bot: MyBot) {
             let slotToClick = -1
             for (let i = 0; i < window.slots.length; i++) {
                 const slot = window.slots[i]
-                if (slot?.type === 380 && (slot?.nbt as any)?.value?.display?.value?.Name?.value?.toString().includes('Claim All')) {
+                if (slot?.type === 380 && (slot?.nbt as any)?.value?.display?.value?.Name?.value?.toString()?.includes('Claim All')) {
                     log('Found cauldron to claim all purchased auctions -> clicking index ' + i)
                     clickWindow(bot, i)
                     bot.removeAllListeners('windowOpen')
                     bot.state = null
                     return
                 }
-
-                if ((slot?.nbt as any)?.value?.display?.value?.Lore?.value?.value?.toString().includes('§7Status: §aSold!')) {
+                let lore = (slot?.nbt as any)?.value?.display?.value?.Lore?.value?.value?.toString()
+                if (lore?.includes('Status:') && lore?.includes('Sold!')) {
                     log('Found claimable purchased auction. Gonna click index ' + i)
                     log(JSON.stringify(slot))
                     slotToClick = i

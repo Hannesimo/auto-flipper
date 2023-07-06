@@ -1,32 +1,30 @@
 import { ScoreBoard } from 'mineflayer'
 import { MyBot } from '../types/autobuy'
 import { printMcChatToConsole, log } from './logger'
-import { removeMinecraftColorCodes } from './utils'
+import { removeMinecraftColorCodes, sleep } from './utils'
 
 export function initAFKHandler(bot: MyBot) {
     let consecutiveTeleportAttempts = 0
-    let intervalId
     registerCheckInverval()
 
     function registerCheckInverval() {
-        if (intervalId) {
-            clearInterval(intervalId)
-        }
-        intervalId = setInterval(() => {
-            let teleportWasTried = checkAFKAndTeleport(bot)
+        setTimeout(async () => {
+            let teleportWasTried = await tryToTeleportToIsland(bot)
             if (teleportWasTried) {
                 consecutiveTeleportAttempts++
                 log(`ConsecutiveTeleportAttemps: ${consecutiveTeleportAttempts}`)
                 registerCheckInverval()
             } else {
                 consecutiveTeleportAttempts = 0
+                registerCheckInverval()
             }
         }, 10000 * (consecutiveTeleportAttempts + 1))
     }
 }
 
-function checkAFKAndTeleport(bot: MyBot) {
+export async function tryToTeleportToIsland(bot: MyBot, delayBeforeTeleport = 5000) {
     if (isLimbo(bot.scoreboard.sidebar)) {
+        await sleep(delayBeforeTeleport)
         log('Bot seems to be in limbo. Sending "/lobby"')
         printMcChatToConsole('§f[§4BAF§f]: §fYou seem to be in limbo.')
         printMcChatToConsole('§f[§4BAF§f]: §fWarping back to lobby...')
@@ -34,7 +32,8 @@ function checkAFKAndTeleport(bot: MyBot) {
         return true
     }
 
-    if (!removeMinecraftColorCodes(bot.scoreboard.sidebar.title).includes('SKYBLOCK')) {
+    if (!bot.scoreboard.sidebar.items.map(item => item.displayName.getText(null).replace(item.name, '')).find(e => e.includes('Purse:'))) {
+        await sleep(delayBeforeTeleport)
         log(`Bot seems to be in lobby (Sidebar title = ${bot.scoreboard.sidebar.title}). Sending "/play sb"`)
         printMcChatToConsole('§f[§4BAF§f]: §fYou seem to be in the lobby.')
         printMcChatToConsole('§f[§4BAF§f]: §fWarping back into skyblock...')
@@ -44,6 +43,7 @@ function checkAFKAndTeleport(bot: MyBot) {
 
     let scoreboard = bot.scoreboard.sidebar.items.map(item => item.displayName.getText(null).replace(item.name, ''))
     if (!scoreboard.find(e => e.includes('Your Island'))) {
+        await sleep(delayBeforeTeleport)
         log('Bot is not on island. Warping back')
         log(bot.scoreboard)
         printMcChatToConsole('§f[§4BAF§f]: §fYou seem to not be on your island.')
