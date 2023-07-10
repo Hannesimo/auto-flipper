@@ -71,7 +71,7 @@ async function sellHandler(data: SellData, bot: MyBot, sellWindow, removeEventLi
 
     if (title == 'Create BIN Auction') {
         if (!setPrice && !durationSet) {
-            if (!sellWindow.slots[13].nbt.value.display.value.Name.value.includes('Click on an item in your inventory!')) {
+            if (!sellWindow.slots[13].nbt.value.display.value.Name.value.includes('Click an item in your inventory!')) {
                 clickWindow(bot, 13)
             }
 
@@ -164,14 +164,17 @@ async function sellHandler(data: SellData, bot: MyBot, sellWindow, removeEventLi
         clickWindow(bot, 16)
     }
     if (title == 'Confirm BIN Auction') {
-        log('Successfully listed an item')
         clickWindow(bot, 11)
+    }
+    if (title == 'BIN Auction View') {
+        log('Successfully listed an item')
         removeEventListenerCallback()
         setPrice = false
         durationSet = false
         bot.state = null
-        printMcChatToConsole(`§f[§4BAF§f]: §fItem listed: ${data.itemName} for ${numberWithThousandsSeparators(data.price)} coins`)
+        printMcChatToConsole(`§f[§4BAF§f]: §fItem listed: ${data.itemName} §ffor ${numberWithThousandsSeparators(data.price)} coins`)
         sendWebhookItemListed(data.itemName, numberWithThousandsSeparators(data.price), data.duration)
+        bot.closeWindow(sellWindow)
     }
 }
 

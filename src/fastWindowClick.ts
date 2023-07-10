@@ -138,15 +138,6 @@ export function createFastWindowClicker(client: Client) {
         if (packetMeta.name === 'open_window') {
             lastWindowId = packet.windowId
         }
-        if (packetMeta.name === 'window_items') {
-            if (packet.items[31]?.nbtData?.value?.display?.value?.Lore?.value?.value?.toString()?.includes('Someone else purchased the item!')) {
-                let itemName = null
-                if (packet.items[13] && packet.items[13].nbtData?.value?.display?.value?.Name?.value) {
-                    itemName = packet.items[13].nbtData?.value?.display?.value?.Name?.value
-                }
-                printMcChatToConsole(`§f[§4BAF§f]: §fAuction${itemName ? ` (${itemName}§f)` : ''} §fwas already purchased by someone else...`)
-            }
-        }
         logPacket(packet, packetMeta, false)
     })
     windowClicker = _windowClicker

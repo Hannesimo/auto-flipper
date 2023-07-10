@@ -1,7 +1,7 @@
 import { ScoreBoard } from 'mineflayer'
 import { MyBot } from '../types/autobuy'
 import { printMcChatToConsole, log } from './logger'
-import { removeMinecraftColorCodes, sleep } from './utils'
+import { sleep } from './utils'
 
 export function initAFKHandler(bot: MyBot) {
     let consecutiveTeleportAttempts = 0
@@ -32,7 +32,9 @@ export async function tryToTeleportToIsland(bot: MyBot, delayBeforeTeleport = 50
         return true
     }
 
-    if (!bot.scoreboard.sidebar.items.map(item => item.displayName.getText(null).replace(item.name, '')).find(e => e.includes('Purse:'))) {
+    if (
+        !bot.scoreboard.sidebar.items.map(item => item.displayName.getText(null).replace(item.name, '')).find(e => e.includes('Purse:') || e.includes('Piggy:'))
+    ) {
         await sleep(delayBeforeTeleport)
         log(`Bot seems to be in lobby (Sidebar title = ${bot.scoreboard.sidebar.title}). Sending "/play sb"`)
         printMcChatToConsole('§f[§4BAF§f]: §fYou seem to be in the lobby.')

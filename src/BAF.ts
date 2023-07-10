@@ -140,8 +140,10 @@ async function onWebsocketMessage(msg) {
     }
 }
 
-async function onScoreboardChanged(scoreboard: ScoreBoard) {
-    if (bot.scoreboard.sidebar.items.map(item => item.displayName.getText(null).replace(item.name, '')).find(e => e.includes('Purse:'))) {
+async function onScoreboardChanged() {
+    if (
+        bot.scoreboard.sidebar.items.map(item => item.displayName.getText(null).replace(item.name, '')).find(e => e.includes('Purse:') || e.includes('Piggy:'))
+    ) {
         bot.removeListener('scoreboardTitleChanged', onScoreboardChanged)
         log('Joined SkyBlock')
         initAFKHandler(bot)

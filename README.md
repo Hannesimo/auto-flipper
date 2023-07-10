@@ -1,11 +1,6 @@
 Join the official Discord server:
 https://www.discord.gg/eYRBsaECzY
 
-Version 1.1.3-TEST
-
-This version uses the MC Version 1.17, to test if this fixes the "server didn't respond to transaction" issue. 1.17 changed a few things, so there are still some issues. For example the log messages that include the item name are wrong because thats now stored in a different way.
-If it is confirmed that the version update fixes the crashing issue some people have, I will fix all the other issues and fully migrate to 1.17.
-
 # BAF
 
 You found the Best Auto Flipper (BAF) for hypixel Skyblock
@@ -55,7 +50,7 @@ NOTE: You only need this if you want to build the code yourself. If you are usin
 ### Linux
 To execute on linux use the following (and follow the input requests)
 ```bash
-version=1.1.3
+version=1.1.0
 wget -c https://github.com/Hannesimo/auto-flipper/releases/download/$version/BAF-$version-linux
 chmod +x BAF-$version-linux 
 ./BAF-$version-linux
