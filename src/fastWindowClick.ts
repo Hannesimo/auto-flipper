@@ -1,5 +1,5 @@
 import { Client } from 'minecraft-protocol'
-import { log, logPacket, printMcChatToConsole } from './logger'
+import { logPacket } from './logger'
 import { numberWithThousandsSeparators } from './utils'
 
 let windowClicker

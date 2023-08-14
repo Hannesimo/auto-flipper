@@ -43,7 +43,21 @@ if (getConfigProperty('LOG_PACKAGES')) {
     addLoggerToClientWriteFunction(bot._client)
 }
 
-bot.once('login', connectWebsocket)
+bot.once('login', () => {
+    connectWebsocket()
+    bot._client.on('packet', function (packet, packetMeta) {
+        if (packetMeta.name.includes('disconnect')) {
+            wss.send(
+                JSON.stringify({
+                    type: 'report',
+                    data: `"${JSON.stringify(packet)}"`
+                })
+            )
+            printMcChatToConsole('§f[§4BAF§f]: §fYou were disconnected from the server...')
+            printMcChatToConsole('§f[§4BAF§f]: §f' + JSON.stringify(packet))
+        }
+    })
+})
 bot.once('spawn', async () => {
     await bot.waitForChunksToLoad()
     await sleep(2000)
