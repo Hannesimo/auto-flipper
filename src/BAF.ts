@@ -67,7 +67,22 @@ bot.once('spawn', async () => {
 })
 
 function connectWebsocket() {
-    wss = new WebSocket(`wss://sky.coflnet.com/modsocket?player=${ingameName}&version=${version}&SId=${getSessionId(ingameName)}`)
+
+    wss = null;
+    if (getConfigProperty('USE_US_SERVER')) {
+        wss = new WebSocket(`ws://sky-us.coflnet.com/modsocket?player=${ingameName}&version=${version}&SId=${getSessionId(ingameName)}`)
+    } else {
+        wss = new WebSocket(`wss://sky.coflnet.com/modsocket?player=${ingameName}&version=${version}&SId=${getSessionId(ingameName)}`)
+    }
+
+    if (wss === null) {
+        setTimeout(() => {
+            connectWebsocket();
+            log(`Could not create WebSocket class.`, 'error')
+        }, 2500);
+    }
+
+
     wss.onopen = function () {
         setupConsoleInterface(wss)
         sendWebhookInitialized()
