@@ -7,13 +7,14 @@ var toml = require('toml')
 let config: Config = {
     INGAME_NAME: '',
     WEBHOOK_URL: '',
-    FLIP_ACTION_DELAY: 100,
+    FLIP_ACTION_DELAY: 0,
     ENABLE_CONSOLE_INPUT: true,
     USE_COFL_CHAT: true,
     SESSIONS: {},
     USE_WINDOW_SKIPS: false,
-    DISCORD_NAME: null,
-    DISCORD_AVATAR: null
+    US_INSTANCE: false,
+    DISCORD_NAME: "B.A.F",
+    DISCORD_AVATAR: ""
 }
 
 json2toml({ simple: true })
