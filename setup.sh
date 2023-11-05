@@ -6,4 +6,5 @@ export NVM_DIR="$HOME/.nvm"
 nvm install 20
 nvm use 20
 npm i
-echo "echo 'to stop BAF please hold control and click the letter C on your keyboard'\n cd auto-flipper \n npm start" > ../start.sh
+echo "run ./start 
+echo "echo 'to stop BAF please hold control and click the letter C on your keyboard' && cd auto-flipper && npm start" > ../start.sh
