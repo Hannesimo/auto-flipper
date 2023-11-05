@@ -6,5 +6,5 @@ export NVM_DIR="$HOME/.nvm"
 nvm install 20
 nvm use 20
 npm i
-echo "run ./start to start" 
-echo "cd auto-flipper && npm start" > ../start.sh
+echo "run bash ./start in root dir to start PLEASE READ THIS this means that as soon as you are in VPS type bash ./start" 
+echo "cd auto-flipper && npm start" > ../start
