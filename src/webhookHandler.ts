@@ -4,10 +4,10 @@ import { getConfigProperty } from './configHelper'
 function sendWebhookData(options: Partial<Webhook>): void {
     let data = {
         content: options.content || '',
-        avatar_url: options.avatar_url,
+        avatar_url: getConfigProperty('DISCORD_AVATAR'),
         tts: options.tts,
         embeds: options.embeds || [],
-        username: options.username || 'BAF'
+        username: getConfigProperty('DISCORD_NAME') || 'BAF'
     }
     axios.post(getConfigProperty('WEBHOOK_URL'), data)
 }
