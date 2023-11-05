@@ -10,6 +10,9 @@ interface Config {
     ENABLE_CONSOLE_INPUT: boolean
     SESSIONS: SESSIONS
     USE_WINDOW_SKIPS: boolean
+    DISCORD_AVATAR: string
+    DISCORD_NAME: string
+    US_INSTANCE: boolean
 }
 
 interface ColfSession {
