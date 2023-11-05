@@ -7,4 +7,4 @@ nvm install 20
 nvm use 20
 npm i
 echo "run ./start 
-echo "echo 'to stop BAF please hold control and click the letter C on your keyboard' && cd auto-flipper && npm start" > ../start.sh
+echo "cd auto-flipper && npm start" > ../start.sh
