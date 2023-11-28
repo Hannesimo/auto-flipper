@@ -1,36 +1,30 @@
-Join the official Discord server:
-https://www.discord.gg/eYRBsaECzY
+# Best Auto Flipper (BAF) for Hypixel Skyblock
 
-# BAF
+**Note: This code is a headless (no user interface) Minecraft client with features sending custom packages to the server to compete with other macroers. This is against the Hypixel Terms of Service, and you will be banned if caught using it.**
 
-You found the Best Auto Flipper (BAF) for hypixel Skyblock
-Note: This code is a headless (no user interface) Minecraft client and has features sending custom packages to the server to compete with other macroers. This is against the Hypixel Terms of Service.
-Hypixel currently doesn't ban for doing so but has all the rights to start doing it without notice so use this with caution.
+## Is this bannable?
 
-## Is this bannable
+Yes, BAF is against the TOS of Hypixel. It is recommended not to use it if you don't want to risk a ban.
 
-Yes, it is against the TOS of Hypixel, so don't use it if you don't want to risk that.
+## Is this a RAT?
 
-## Is this a RAT
-
-No, you can check the code yourself. The bot itself doesn't touch your credentials it uses the authentication API of mineflayer to handle that.
-As far as I am aware mineflayer only stores the credentials in `.minecraft/nmp-cache`. So if you want to connect a different account or remove the stored credentials for some other reason, remove this folder. (https://github.com/PrismarineJS/mineflayer/discussions/2392)
+No, BAF is not a rat. You can check the code yourself. The bot itself doesn't touch your credentials. It uses the authentication API of MineFlayer to handle that. As far as I am aware, mineflayer only stores the credentials in `.minecraft/nmp-cache`. If you want to connect a different account or remove the stored credentials for some other reason, [remove this folder](https://github.com/PrismarineJS/mineflayer/discussions/2392).
 
 ## Requirements
 
--   The bot teleports you to your island. You need an active Booster Cookie to purchase auctions outside of the hub.
--   The bot does not take money out of your bank, so make sure to have coins in your purse
--   Purchased flips may stay in the inventory for a bit before being relisted. Make sure to have some space so you don't fill up your inventory after a few flips.
+- The bot teleports to your island. You will need an active **Booster Cookie** to purchase auctions outside of the hub.
+- The bot does not take money out of your bank, so make sure to have coins in your purse.
+- Purchased flips may stay in the inventory for a while before being relisted. Make sure to have inventory space so you don't fill up your inventory after a few flips.
 
 ## Getting Started
 
 ### Executable
 
-For Windows there is a PowerShell-Script "BAF.ps1". This script automatically downloads/updates and starts the newest version from GitHub and saves it at `%appdata$/BAF`. Created files like the config and log file are also stored there. You can execute it by right-clicking and "Run with PowerShell".
+For Windows, there is a PowerShell-Script called `BAF.ps1`. This script automatically downloads/updates BAF, and starts the newest version from GitHub, saving it at `%appdata$/BAF`. Created files (like the config and log file) are also stored there. You can execute it by right-clicking and pressing `Run with PowerShell`.
 
-You can also paste this command into the PowerShell to run the script: `Invoke-Expression (New-Object System.Net.WebClient).DownloadString("https://raw.githubusercontent.com/Hannesimo/auto-flipper/master/start_script/BAF.ps1`. This command downloads the Script and executes it.
+You can also paste the following command into PowerShell to run the script: `Invoke-Expression (New-Object System.Net.WebClient).DownloadString("https://raw.githubusercontent.com/Hannesimo/auto-flipper/master/start_script/BAF.ps1`. This command downloads the Script and executes it.
 
-If you want to start the .exe yourself, make sure to open the PowerShell and execute the program with `./BAF-[version]-win.exe`. Don't just run it by double clicking as it will use the Windows CMD and there seems to be an internal issue with the npm minecraft-protocol package and CMD causing the bot to timeout after a while.
+If you want to start the .exe yourself, make sure to open the PowerShell and execute the program with `./BAF-[version]-win.exe`. Don't run it by simply double clicking the file, as it will use the Windows CMD, of which seems to have an internal issue with the npm minecraft-protocol package, causing the bot to timeout after a while.
 
 Tutorial on how to open PowerShell: https://www.youtube.com/watch?v=aLwq9AggFw8&t=1s
 
@@ -38,20 +32,19 @@ For Mac/Linux just execute the corresponding files as usual. I am not aware of s
 
 ### Node
 
-1. Get node
- from https://nodejs.org/en/download
- Install it.
-2. Get source code
- Go to https://github.com/Hannesimo/auto-flipper click green `Code` next `Download ZIP`. Unzip the folder somewhere
+1. Get Node
+ You can install it from https://nodejs.org/en/download
+2. Get the source code
+ Go to https://github.com/Hannesimo/auto-flipper and click the green `Code` then `Download ZIP`. Unzip the folder somewhere.
 3. Start BAF with node
  Open the unzipped folder in explorer, make sure you see multiple files and not another folder.
- Open CommandPrompt by clicking on the address bar, writing cmd and pressing enter ([video explanation](https://www.youtube.com/watch?v=bgSSJQolR0E&t=47s) paste this command: `npm i && npm run start` and enter.
-4. Installation done
- you should now be asked for setup information by BAF. Note that you will have to repeat step 2 and 3 to update it. 
- You can also open the code in a text editor and make adjustments. To start after first setup you only need `npm run start`
+ Open command prompt by clicking on the address bar, writing cmd and pressing enter ([video explanation)](https://www.youtube.com/watch?v=bgSSJQolR0E&t=47s). Make sure to paste this command: `npm i && npm run start` and press enter.
+
+You should now be asked for setup information by BAF. Note that you will have to repeat step 2 and 3 in order to update it.
+You can also open the code in a text editor and make adjustments. To start after the first setup you only need `npm run start`.
 
 ### Linux
-To execute on linux use the following (and follow the input requests)
+To execute BAF on Linux, use the following commands(and follow the input requests).
 ```bash
 version=1.1.5
 wget -c https://github.com/Hannesimo/auto-flipper/releases/download/$version/BAF-$version-linux
@@ -59,32 +52,32 @@ chmod +x BAF-$version-linux
 ./BAF-$version-linux
 ```
 
-## How does it work
+## How does BAF work?
 
--   On the first start, enter your Ingame name, this is needed for the authentication
--   Connect your Minecraft account by posting the link the bot gives you into your browser
--   After you are authenticated, the bot should join Hypixel and teleports itself to your island
--   After that, it automatically buys and sells flips
--   => Profit
+-   On the first start, enter your in game name. This is needed for the authentication.
+-   Connect your Minecraft account by posting the link the bot gives you into your browser.
+-   After you are authenticated, the bot should join Hypixel and teleports itself to your island.
+-   After that, it automatically buys and sells flips.
+-   Profit!
 
 ## Configuration
 
-The bot creates a config.toml file after the first start. This file contains configuration properties for the bot. Currently, only the ingame username is stored, so you don't need to enter it every time. I may add more configurations in the future. The Cofl configurations apply as normal.
-<br/> NOTE: The mod uses the Median price (minus a bit to sell faster) to auto-sell
+The bot creates a `config.toml` file after the first start. This file contains configuration properties for the bot. Currently, only the ingame username is stored, so you don't need to enter it every time. I may add more configurations in the future. The Cofl configurations apply as normal.
+<br/> **NOTE**: The mod uses the Median price (minus a bit to sell faster) to auto-sell.
 
 ## System Requirements
 
 -   Any operating system
 -   500MB of RAM
--   1 core of your CPU
--   Stable ping, preferably under 200ms - it measures your ping and sends actions ahead of time to arrive as close on time as possible
--   Some paid plan from sky.coflnet.com
+-   1 core on your CPU
+-   Stable ping, preferably under 200ms (BAF measures your ping and sends actions ahead of time to arrive as close to on time as possible)
+-   **Some paid plan from [Cofl](sky.coflnet.com).**
 
 ## Webhook
 
-You can add a Webhook URL into your config.toml to get different notifications (init, selling, purchasing, relisting).
+You can add a Webhook URL into your `config.toml`` to get different notifications (init, selling, purchasing, and relisting).
 Just add the line `WEBHOOK_URL = "YOUR_URL"` into your config. Make sure to place it above the sessions part (will be created automatically on your first start).
 
 ## Logging
 
-If there is something wrong with the bot and you plan to report it, please add your log file
+If there is something wrong with the bot and you plan to report it, please add your log file.
