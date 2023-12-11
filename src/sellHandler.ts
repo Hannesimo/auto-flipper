@@ -10,14 +10,14 @@ let retryCount = 0
 export async function onWebsocketCreateAuction(bot: MyBot, data: SellData) {
     if (bot.state) {
         log('Currently busy with something else (' + bot.state + ') -> not selling')
-        if (retryCount > 3) {
+        if (retryCount > 10) {
             retryCount = 0
             return
         }
         setTimeout(() => {
             retryCount++
             onWebsocketCreateAuction(bot, data)
-        }, 1000)
+        }, 2000)
         return
     }
     bot.state = 'selling'

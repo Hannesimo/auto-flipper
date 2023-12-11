@@ -28,7 +28,7 @@ export function registerIngameMessageHandler(bot: MyBot, wss: WebSocket) {
             }
             if (text.startsWith('[Auction]') && text.includes('bought') && text.includes('for')) {
                 log('New item sold')
-                claimSoldItem(bot, text.split(' bought ')[1].split(' for ')[0])
+                claimSoldItem(bot)
 
                 sendWebhookItemSold(
                     text.split(' bought ')[1].split(' for ')[0],
@@ -113,11 +113,11 @@ function claimPurchased(bot: MyBot) {
     })
 }
 
-async function claimSoldItem(bot: MyBot, itemName: string) {
+export async function claimSoldItem(bot: MyBot) {
     if (bot.state) {
         log('Currently busy with something else (' + bot.state + ') -> not claiming sold item')
         setTimeout(() => {
-            claimSoldItem(bot, itemName)
+            claimSoldItem(bot)
         }, 1000)
         return
     }
@@ -145,7 +145,7 @@ async function claimSoldItem(bot: MyBot, itemName: string) {
                 if (item?.nbt?.value?.display?.value?.Lore && JSON.stringify(item.nbt.value.display.value.Lore).includes('Sold for')) {
                     clickSlot = item.slot
                 }
-                if (item && item.type === 380 && (item.nbt as any).value?.display?.value?.Name?.value?.toString().includes('Claim All')) {
+                if (item && item.name === 'cauldron' && (item.nbt as any).value?.display?.value?.Name?.value?.toString().includes('Claim All')) {
                     log(item)
                     log('Found cauldron to claim all sold auctions -> clicking index ' + item.slot)
                     clickWindow(bot, item.slot)

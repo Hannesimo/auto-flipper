@@ -47,7 +47,6 @@ export async function tryToTeleportToIsland(bot: MyBot, delayBeforeTeleport = 50
     if (!scoreboard.find(e => e.includes('Your Island'))) {
         await sleep(delayBeforeTeleport)
         log('Bot is not on island. Warping back')
-        log(bot.scoreboard)
         printMcChatToConsole('§f[§4BAF§f]: §fYou seem to not be on your island.')
         printMcChatToConsole('§f[§4BAF§f]: §fWarping back to island...')
         bot.chat('/is')

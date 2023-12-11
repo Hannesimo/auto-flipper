@@ -11,8 +11,7 @@ let config: Config = {
     ENABLE_CONSOLE_INPUT: true,
     USE_COFL_CHAT: true,
     SESSIONS: {},
-    USE_WINDOW_SKIPS: false,
-    US_INSTANCE: false
+    USE_WINDOW_SKIPS: false
 }
 
 json2toml({ simple: true })

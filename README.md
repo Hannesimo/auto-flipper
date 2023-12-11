@@ -38,22 +38,19 @@ For Mac/Linux just execute the corresponding files as usual. I am not aware of s
 
 ### Node
 
-1. Get node
- from https://nodejs.org/en/download
- Install it.
-2. Get source code
- Go to https://github.com/Hannesimo/auto-flipper click green `Code` next `Download ZIP`. Unzip the folder somewhere
-3. Start BAF with node
- Open the unzipped folder in explorer, make sure you see multiple files and not another folder.
- Open CommandPrompt by clicking on the address bar, writing cmd and pressing enter ([video explanation](https://www.youtube.com/watch?v=bgSSJQolR0E&t=47s) paste this command: `npm i && npm run start` and enter.
-4. Installation done
- you should now be asked for setup information by BAF. Note that you will have to repeat step 2 and 3 to update it. 
- You can also open the code in a text editor and make adjustments. To start after first setup you only need `npm run start`
+To run or build the code, you need Node and npm.
+
+-   To run it just execute `npm install` followed by `npm run start`<br/><br/>
+-   To build the executables the following command for the following OS:
+    -   Windows: `npm run build-executables-win`
+    -   Linux: `npm run build-executables-linux`
+
+NOTE: You only need this if you want to build the code yourself. If you are using a executable, you can ignore the node steps.
 
 ### Linux
 To execute on linux use the following (and follow the input requests)
 ```bash
-version=1.1.5
+version=1.1.6
 wget -c https://github.com/Hannesimo/auto-flipper/releases/download/$version/BAF-$version-linux
 chmod +x BAF-$version-linux 
 ./BAF-$version-linux

@@ -7,7 +7,7 @@ import { onWebsocketCreateAuction } from './sellHandler'
 import { tradePerson } from './tradeHandler'
 import { swapProfile } from './swapProfileHandler'
 import { flipHandler } from './flipHandler'
-import { registerIngameMessageHandler } from './ingameMessageHandler'
+import { claimSoldItem, registerIngameMessageHandler } from './ingameMessageHandler'
 import { MyBot, TextMessageData } from '../types/autobuy'
 import { getConfigProperty, initConfigHelper, updatePersistentConfigProperty } from './configHelper'
 import { getSessionId } from './coflSessionManager'
@@ -67,11 +67,7 @@ bot.once('spawn', async () => {
 })
 
 function connectWebsocket() {
-    if (getConfigProperty('US_INSTANCE') == true) {
-    wss = new WebSocket(`ws://sky-us.coflnet.com/modsocket?player=${ingameName}&version=${version}&SId=${getSessionId(ingameName)}`)
-    } else {
     wss = new WebSocket(`wss://sky.coflnet.com/modsocket?player=${ingameName}&version=${version}&SId=${getSessionId(ingameName)}`)
-    }
     wss.onopen = function () {
         setupConsoleInterface(wss)
         sendWebhookInitialized()
@@ -148,7 +144,20 @@ async function onWebsocketMessage(msg) {
             break
         case 'execute':
             log(message, 'debug')
-            bot.chat(data)
+            if (data.startsWith('/cofl')) {
+                let splits = data.split(' ')
+                splits.shift() // remove /cofl
+                let command = splits.shift()
+
+                wss.send(
+                    JSON.stringify({
+                        type: command,
+                        data: `"${splits.join(' ')}"`
+                    })
+                )
+            } else {
+                bot.chat(data)
+            }
             break
         case 'privacySettings':
             log(message, 'debug')
@@ -179,5 +188,9 @@ async function onScoreboardChanged() {
         }, 5500)
         await sleep(2500)
         tryToTeleportToIsland(bot, 0)
+
+        await sleep(20000)
+        // trying to claim sold items if sold while user was offline
+        claimSoldItem(bot)
     }
 }

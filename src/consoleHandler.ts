@@ -12,7 +12,7 @@ export function setupConsoleInterface(ws: WebSocket) {
     })
 
     rl.on('line', input => {
-        if (input?.startsWith('/cofl') && input?.split(' ').length >= 2) {
+        if ((input?.startsWith('/cofl') || input?.startsWith('/baf')) && input?.split(' ').length >= 2) {
             let splits = input.split(' ')
             splits.shift() // remove /cofl
             let command = splits.shift()
