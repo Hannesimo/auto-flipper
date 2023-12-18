@@ -156,6 +156,14 @@ export async function claimSoldItem(bot: MyBot) {
                 }
             }
 
+            if (!clickSlot) {
+                log('No sold auctions found')
+                clearTimeout(timeout)
+                bot.removeAllListeners('windowOpen')
+                bot.state = null
+                bot.closeWindow(window)
+                return
+            }
             log('Clicking auction to claim, index: ' + clickSlot)
             log(JSON.stringify(window.slots[clickSlot]))
 
