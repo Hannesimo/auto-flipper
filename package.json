@@ -1,6 +1,6 @@
 {
   "name": "baf",
-  "version": "1.1.8",
+  "version": "1.1.9",
   "description": "",
   "main": "index.ts",
   "scripts": {
@@ -10,7 +10,7 @@
     "build-executables-linux": "npm install && tsc && pkg ./build/BAF.js --targets node18-win-x64,node18-macos-x64,node18-linux-x64 --output ./executables/BAF-${npm_package_version}"
   },
   "keywords": [],
-  "author": "",
+  "author": "",  
   "license": "ISC",
   "dependencies": {
     "axios": "^0.27.2",

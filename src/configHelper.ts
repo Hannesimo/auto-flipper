@@ -11,7 +11,9 @@ let config: Config = {
     ENABLE_CONSOLE_INPUT: true,
     USE_COFL_CHAT: true,
     SESSIONS: {},
-    USE_WINDOW_SKIPS: false
+    // this is bannable do not use
+    USE_WINDOW_SKIPS: false,
+    WEBSOCKET_URL: 'wss://sky.coflnet.com/modsocket'
 }
 
 json2toml({ simple: true })

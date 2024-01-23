@@ -1,4 +1,5 @@
 import { MyBot, SellData } from '../types/autobuy'
+import { getCurrentWebsocket } from './BAF'
 import { log, printMcChatToConsole } from './logger'
 import { clickWindow, getWindowTitle, numberWithThousandsSeparators, removeMinecraftColorCodes } from './utils'
 import { sendWebhookItemListed } from './webhookHandler'
@@ -8,6 +9,7 @@ let durationSet = false
 let retryCount = 0
 
 export async function onWebsocketCreateAuction(bot: MyBot, data: SellData) {
+    let ws = await getCurrentWebsocket()
     if (bot.state) {
         log('Currently busy with something else (' + bot.state + ') -> not selling')
         if (retryCount > 10) {
@@ -23,10 +25,10 @@ export async function onWebsocketCreateAuction(bot: MyBot, data: SellData) {
     bot.state = 'selling'
     log('Selling item...')
     log(data)
-    sellItem(data, bot)
+    sellItem(data, bot, ws)
 }
 
-async function sellItem(data: SellData, bot: MyBot) {
+async function sellItem(data: SellData, bot: MyBot, ws: WebSocket) {
     let timeout = setTimeout(() => {
         log('Seems something went wrong while selling. Removing lock', 'warn')
         bot.state = null
@@ -34,7 +36,7 @@ async function sellItem(data: SellData, bot: MyBot) {
     }, 10000)
 
     let handler = function (window: any) {
-        sellHandler(data, bot, window, () => {
+        sellHandler(data, bot, window, ws, () => {
             clearTimeout(timeout)
             bot.removeAllListeners('windowOpen')
         })
@@ -43,7 +45,10 @@ async function sellItem(data: SellData, bot: MyBot) {
     bot.chat('/ah')
 }
 
-async function sellHandler(data: SellData, bot: MyBot, sellWindow, removeEventListenerCallback: Function) {
+// Store the reason if the last sell attempt failed
+// If it happens again, send a error message to the backend
+let previousError
+async function sellHandler(data: SellData, bot: MyBot, sellWindow, ws: WebSocket, removeEventListenerCallback: Function) {
     let title = getWindowTitle(sellWindow)
     log(title)
     if (title.toString().includes('Auction House')) {
@@ -78,6 +83,15 @@ async function sellHandler(data: SellData, bot: MyBot, sellWindow, removeEventLi
             // calculate item slot, by calculating the slot index without the chest
             let itemSlot = data.slot - bot.inventory.inventoryStart + sellWindow.inventoryStart
             if (!sellWindow.slots[itemSlot]) {
+                if (previousError === 'Slot empty') {
+                    ws.send(
+                        JSON.stringify({
+                            type: 'clientError',
+                            data: { data, message: 'createAuction slot empty' }
+                        })
+                    )
+                }
+                previousError = 'Slot empty'
                 bot.state = null
                 removeEventListenerCallback()
                 log('No item at index ' + itemSlot + ' found -> probably already sold', 'warn')
@@ -87,12 +101,22 @@ async function sellHandler(data: SellData, bot: MyBot, sellWindow, removeEventLi
             let id = sellWindow.slots[itemSlot]?.nbt?.value?.ExtraAttributes?.value?.id?.value
             let uuid = sellWindow.slots[itemSlot]?.nbt?.value?.ExtraAttributes?.value?.uuid?.value
             if (data.id !== id && data.id !== uuid) {
+                if (previousError === "Item doesn't match") {
+                    ws.send(
+                        JSON.stringify({
+                            type: 'clientError',
+                            data: { data, slot: JSON.stringify(sellWindow.slots[itemSlot]), message: 'createAuction item doesnt match' }
+                        })
+                    )
+                }
+                previousError = 'Item doesnt match'
                 bot.state = null
                 removeEventListenerCallback()
                 log('Item at index ' + itemSlot + '" does not match item that is supposed to be sold: "' + data.id + '" -> dont sell', 'warn')
                 log(JSON.stringify(sellWindow.slots[itemSlot]))
                 return
             }
+            previousError = null
 
             clickWindow(bot, itemSlot)
             bot._client.once('open_sign_entity', ({ location }) => {

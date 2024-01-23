@@ -1,8 +1,10 @@
 import { MyBot, TradeData } from '../types/autobuy'
+import { getCurrentWebsocket } from './BAF'
 import { log } from './logger'
 import { clickWindow, sleep } from './utils'
 
-export async function tradePerson(bot: MyBot, websocket: WebSocket, data: TradeData) {
+export async function tradePerson(bot: MyBot, data: TradeData) {
+    let wss = await getCurrentWebsocket()
     let addedCoins = false
     let addedItems = false
     let trading = true
@@ -56,7 +58,7 @@ export async function tradePerson(bot: MyBot, websocket: WebSocket, data: TradeD
                         clickWindow(bot, 36)
                     }
                     if (!(data.coins > 0) || addedCoins) {
-                        websocket.send(JSON.stringify({ type: 'affirmFlip', data: [JSON.stringify(window.slots)] }))
+                        wss.send(JSON.stringify({ type: 'affirmFlip', data: [JSON.stringify(window.slots)] }))
                     }
                 })
             }

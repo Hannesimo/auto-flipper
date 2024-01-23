@@ -1,8 +1,7 @@
-import { ScoreBoard } from 'mineflayer'
 import { createBot } from 'mineflayer'
 import { createFastWindowClicker } from './fastWindowClick'
 import { addLoggerToClientWriteFunction, initLogger, log, printMcChatToConsole } from './logger'
-import { clickWindow, isCoflChatMessage, removeMinecraftColorCodes, sleep } from './utils'
+import { clickWindow, isCoflChatMessage, sleep } from './utils'
 import { onWebsocketCreateAuction } from './sellHandler'
 import { tradePerson } from './tradeHandler'
 import { swapProfile } from './swapProfileHandler'
@@ -12,14 +11,14 @@ import { MyBot, TextMessageData } from '../types/autobuy'
 import { getConfigProperty, initConfigHelper, updatePersistentConfigProperty } from './configHelper'
 import { getSessionId } from './coflSessionManager'
 import { sendWebhookInitialized } from './webhookHandler'
-import { setupConsoleInterface } from './consoleHandler'
+import { handleCommand, setupConsoleInterface } from './consoleHandler'
 import { initAFKHandler, tryToTeleportToIsland } from './AFKHandler'
 const WebSocket = require('ws')
 var prompt = require('prompt-sync')()
 initConfigHelper()
 initLogger()
-const version = '1.5.0-af'
-let wss: WebSocket
+const version = '1.5.1-af'
+let _websocket: WebSocket
 let ingameName = getConfigProperty('INGAME_NAME')
 
 if (!ingameName) {
@@ -45,8 +44,9 @@ if (getConfigProperty('LOG_PACKAGES')) {
 
 bot.once('login', () => {
     connectWebsocket()
-    bot._client.on('packet', function (packet, packetMeta) {
+    bot._client.on('packet', async function (packet, packetMeta) {
         if (packetMeta.name.includes('disconnect')) {
+            let wss = await getCurrentWebsocket()
             wss.send(
                 JSON.stringify({
                     type: 'report',
@@ -58,30 +58,33 @@ bot.once('login', () => {
         }
     })
 })
+
 bot.once('spawn', async () => {
     await bot.waitForChunksToLoad()
     await sleep(2000)
     bot.chat('/play sb')
     bot.on('scoreboardTitleChanged', onScoreboardChanged)
-    registerIngameMessageHandler(bot, wss)
+    registerIngameMessageHandler(bot)
 })
 
-function connectWebsocket() {
-    wss = new WebSocket(`wss://sky.coflnet.com/modsocket?player=${ingameName}&version=${version}&SId=${getSessionId(ingameName)}`)
-    wss.onopen = function () {
-        setupConsoleInterface(wss)
+function connectWebsocket(url: string = getConfigProperty('WEBSOCKET_URL')) {
+    _websocket = new WebSocket(`${url}?player=${ingameName}&version=${version}&SId=${getSessionId(ingameName)}`)
+    _websocket.onopen = function () {
+        setupConsoleInterface(bot)
         sendWebhookInitialized()
+        updatePersistentConfigProperty('WEBSOCKET_URL', url)
     }
-    wss.onmessage = onWebsocketMessage
-    wss.onclose = function (e) {
+    _websocket.onmessage = onWebsocketMessage
+    _websocket.onclose = function (e) {
+        printMcChatToConsole('§f[§4BAF§f]: §4Connection closed. Reconnecting...')
         log('Connection closed. Reconnecting... ', 'warn')
         setTimeout(function () {
             connectWebsocket()
         }, 1000)
     }
-    wss.onerror = function (err) {
+    _websocket.onerror = function (err) {
         log('Connection error: ' + JSON.stringify(err), 'error')
-        wss.close()
+        _websocket.close()
     }
 }
 
@@ -124,7 +127,7 @@ async function onWebsocketMessage(msg) {
             break
         case 'trade':
             log(message, 'debug')
-            tradePerson(bot, wss, data)
+            tradePerson(bot, data)
             break
         case 'tradeResponse':
             let tradeDisplay = (bot.currentWindow.slots[39].nbt.value as any).display.value.Name.value
@@ -135,6 +138,7 @@ async function onWebsocketMessage(msg) {
             break
         case 'getInventory':
             log('Uploading inventory...')
+            let wss = await getCurrentWebsocket()
             wss.send(
                 JSON.stringify({
                     type: 'uploadInventory',
@@ -144,20 +148,7 @@ async function onWebsocketMessage(msg) {
             break
         case 'execute':
             log(message, 'debug')
-            if (data.startsWith('/cofl')) {
-                let splits = data.split(' ')
-                splits.shift() // remove /cofl
-                let command = splits.shift()
-
-                wss.send(
-                    JSON.stringify({
-                        type: command,
-                        data: `"${splits.join(' ')}"`
-                    })
-                )
-            } else {
-                bot.chat(data)
-            }
+            handleCommand(bot, data)
             break
         case 'privacySettings':
             log(message, 'debug')
@@ -174,7 +165,8 @@ async function onScoreboardChanged() {
         bot.removeListener('scoreboardTitleChanged', onScoreboardChanged)
         log('Joined SkyBlock')
         initAFKHandler(bot)
-        setTimeout(() => {
+        setTimeout(async () => {
+            let wss = await getCurrentWebsocket()
             log('Waited for grace period to end. Flips can now be bought.')
             bot.state = null
             bot.removeAllListeners('scoreboardTitleChanged')
@@ -193,4 +185,27 @@ async function onScoreboardChanged() {
         // trying to claim sold items if sold while user was offline
         claimSoldItem(bot)
     }
+}
+
+export function changeWebsocketURL(newURL: string) {
+    _websocket.onclose = () => {}
+    _websocket.close()
+    if (_websocket.readyState === WebSocket.CONNECTING || _websocket.readyState === WebSocket.CLOSING) {
+        setTimeout(() => {
+            changeWebsocketURL(newURL)
+        }, 500)
+        return
+    }
+    connectWebsocket(newURL)
+}
+
+export async function getCurrentWebsocket(): Promise<WebSocket> {
+    if (_websocket.readyState === WebSocket.OPEN) {
+        return _websocket
+    }
+    return new Promise(async resolve => {
+        await sleep(1000)
+        let socket = await getCurrentWebsocket()
+        resolve(socket)
+    })
 }
