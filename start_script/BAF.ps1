@@ -1,4 +1,4 @@
-$BafPath = "${env:APPDATA}\BAF"
+$BafPath = "`"${env:APPDATA}\BAF`""
 $Response = Invoke-WebRequest -URI "https://api.github.com/repos/Hannesimo/auto-flipper/releases" -UseBasicParsing
 $Releases = ConvertFrom-Json $Response.Content
 
@@ -37,4 +37,4 @@ else {
 }
 
 Write-Output "Starting BAF..."
-Invoke-Expression "${BafPath}\${ExecutableName}"
+Invoke-Expression "`"$BafPath\${ExecutableName}`""
