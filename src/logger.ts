@@ -39,10 +39,6 @@ export function log(string: any, level?: string) {
 }
 
 export function logPacket(packet: any, packetMeta: PacketMeta, toServer: boolean) {
-    if (!getConfigProperty('LOG_PACKAGES')) {
-        return
-    }
-
     if (packetMeta.name !== 'window_click' && packetMeta.name !== 'open_window' && packetMeta.name !== 'window_items') {
         return
     }

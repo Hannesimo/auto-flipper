@@ -33,7 +33,7 @@ export function setupConsoleInterface(bot: MyBot) {
         ws.send(
             JSON.stringify({
                 type: 'chat',
-                data: `"${input}"`
+                data: JSON.stringify(input)
             })
         )
     })

@@ -1,40 +1,38 @@
-$BafPath = "${env:APPDATA}\BAF"
-$Response = Invoke-WebRequest -URI "https://api.github.com/repos/Hannesimo/auto-flipper/releases" -UseBasicParsing
-$Releases = ConvertFrom-Json $Response.Content
-
-$Response = Invoke-WebRequest -URI $Releases[0].assets_url -UseBasicParsing
-$Assets = ConvertFrom-Json $Response.Content
-
-$NewestVersion = $Releases[0].tag_name
-$Executable = ""
-foreach ($Asset in $Assets) {
-    if ($Asset.name -like "*-win.exe") {
-        $Executable = $Asset
-    }
+# Check if node is installed
+if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+    Write-Output "ERROR: Seems like node is not installed. Please install it and run the script again."
+    Write-Output "You can get it here: https://nodejs.org/en/download/prebuilt-installer"
+    Exit
 }
-$ExecutableName = $Executable.name
 
+# Create BAF folder in APPDATA if it doesn't exist
+$BafPath = '"${env:APPDATA}\BAF"'
 $FolderExists = Test-Path -Path $BafPath -PathType Container
 if (!$FolderExists) {
-    $_ = New-Item -ItemType Directory -Path $BafPath
+    New-Item -ItemType Directory -Path $BafPath
 }
 
-$FilePath = Get-ChildItem -Path $BafPath -Filter "BAF*-win.exe" -File
+# Download latest version of BAF
+$ProgressPreference = "SilentlyContinue"
+$Response = Invoke-WebRequest -URI "https://api.github.com/repos/Hannesimo/auto-flipper/releases" -UseBasicParsing
+$Releases = ConvertFrom-Json $Response.Content
+$ZipURL = $Releases[0].zipball_url
+$ZipFilePath = "$BafPath\BAF.zip"
+$NewestVersion = $Releases[0].tag_name
 
-if ($FilePath) {
-    if ($FilePath[0].Name -ne "${ExecutableName}") {
-        Write-Output "Newest available version: ${NewestVersion}"
-        Write-Output "Different Executable present. Downloading new version..."
-        Remove-Item $FilePath[0].FullName
-        $wc = New-Object net.webclient
-        $wc.Downloadfile($Executable.browser_download_url, "${BafPath}\${ExecutableName}")
-    }
-}
-else {
-    Write-Output "Executable is not present. Downloading..."
-    $wc = New-Object net.webclient
-    $wc.Downloadfile($Executable.browser_download_url, "${BafPath}\${ExecutableName}")
+# Check if the latest version is already installed
+# if not install it
+$FolderPath = Join-Path -Path $BafPath -ChildPath $NewestVersion
+$NewestVersionAlreadyInstalled = Test-Path -Path $FolderPath -PathType Container
+if (-not $NewestVersionAlreadyInstalled) {
+    Invoke-WebRequest -Uri $ZipURL -OutFile $ZipFilePath
+    Expand-Archive -Path $ZipFilePath -DestinationPath $BafPath 
+    Remove-Item -Path $ZipFilePath
+    $ResultFolder = Get-ChildItem -Path $BafPath | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+    Rename-Item -Path $ResultFolder.FullName -NewName $NewestVersion
 }
 
-Write-Output "Starting BAF..."
-Invoke-Expression "${BafPath}\${ExecutableName}"
+# Start BAF
+Set-Location -Path $FolderPath
+Invoke-Expression "npm i"
+Invoke-Expression "npm run start"

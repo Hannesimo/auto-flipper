@@ -138,7 +138,7 @@ export function createFastWindowClicker(client: Client) {
         if (packetMeta.name === 'open_window') {
             lastWindowId = packet.windowId
         }
-        logPacket(packet, packetMeta, false)
+        //logPacket(packet, packetMeta, false)
     })
     windowClicker = _windowClicker
 }

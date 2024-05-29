@@ -1,6 +1,5 @@
 import { Flip, MyBot } from '../types/autobuy'
 import { getConfigProperty } from './configHelper'
-import { getFastWindowClicker } from './fastWindowClick'
 import { log, printMcChatToConsole } from './logger'
 import { clickWindow, getWindowTitle, numberWithThousandsSeparators, sleep } from './utils'
 
@@ -22,10 +21,8 @@ export async function flipHandler(bot: MyBot, flip: Flip) {
         }
     }, 10000)
     let isBed = flip.purchaseAt.getTime() > new Date().getTime()
-    let delayUntilBuyStart = isBed ? flip.purchaseAt.getTime() - new Date().getTime() : getConfigProperty('FLIP_ACTION_DELAY')
 
     bot.lastViewAuctionCommandForPurchase = `/viewauction ${flip.id}`
-    await sleep(delayUntilBuyStart)
     bot.chat(bot.lastViewAuctionCommandForPurchase)
 
     printMcChatToConsole(
@@ -34,44 +31,38 @@ export async function flipHandler(bot: MyBot, flip: Flip) {
         )} coins (Target: ${numberWithThousandsSeparators(flip.target)})`
     )
 
-    if (getConfigProperty('USE_WINDOW_SKIPS')) {
-        useWindowSkipPurchase(flip, isBed)
-
-        // clear timeout after 1sec, so there are no weird overlaps that mess up the windowIds
-        setTimeout(() => {
-            bot.state = null
-            clearTimeout(timeout)
-        }, 2500)
-    } else {
-        useRegularPurchase(bot)
-    }
+    await useRegularPurchase(bot, flip, isBed)
+    clearTimeout(timeout)
 }
 
-async function useRegularPurchase(bot: MyBot) {
-    bot.addListener('windowOpen', async window => {
-        let title = getWindowTitle(window)
-        if (title.toString().includes('BIN Auction View')) {
+function useRegularPurchase(bot: MyBot, flip: Flip, isBed: boolean) {
+    return new Promise<void>((resolve, reject) => {
+        bot.addListener('windowOpen', async window => {
             await sleep(getConfigProperty('FLIP_ACTION_DELAY'))
-            clickWindow(bot, 31)
-        }
-        if (title.toString().includes('Confirm Purchase')) {
-            await sleep(getConfigProperty('FLIP_ACTION_DELAY'))
-            clickWindow(bot, 11)
-            bot.removeAllListeners('windowOpen')
-            bot.state = null
-            return
-        }
+            let title = getWindowTitle(window)
+            if (title.toString().includes('BIN Auction View')) {
+                let multipleBedClicksDelay = getConfigProperty('BED_MULTIPLE_CLICKS_DELAY')
+                let delayUntilBuyStart = isBed
+                    ? flip.purchaseAt.getTime() - new Date().getTime() - (multipleBedClicksDelay > 0 ? multipleBedClicksDelay : 0)
+                    : flip.purchaseAt.getTime() - new Date().getTime()
+                await sleep(delayUntilBuyStart)
+
+                if (isBed && getConfigProperty('BED_MULTIPLE_CLICKS_DELAY') > 0) {
+                    for (let i = 0; i < 3; i++) {
+                        clickWindow(bot, 31)
+                        await sleep(getConfigProperty('BED_MULTIPLE_CLICKS_DELAY'))
+                    }
+                } else {
+                    clickWindow(bot, 31)
+                }
+            }
+            if (title.toString().includes('Confirm Purchase')) {
+                clickWindow(bot, 11)
+                bot.removeAllListeners('windowOpen')
+                bot.state = null
+                resolve()
+                return
+            }
+        })
     })
-}
-
-async function useWindowSkipPurchase(flip: Flip, isBed: boolean) {
-    let lastWindowId = getFastWindowClicker().getLastWindowId()
-
-    if (isBed) {
-        getFastWindowClicker().clickBedPurchase(flip.startingBid, lastWindowId + 1)
-    } else {
-        getFastWindowClicker().clickPurchase(flip.startingBid, lastWindowId + 1)
-    }
-    await sleep(getConfigProperty('FLIP_ACTION_DELAY'))
-    getFastWindowClicker().clickConfirm(flip.startingBid, flip.itemName, lastWindowId + 2)
 }

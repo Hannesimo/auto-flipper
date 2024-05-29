@@ -1,16 +1,16 @@
 {
   "name": "baf",
-  "version": "1.1.9",
+  "version": "2.0.0",
   "description": "",
   "main": "index.ts",
   "scripts": {
     "start": "tsc && node ./build/BAF.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build-executables-win": "npm install && tsc && pkg ./build/BAF.js --targets node18-win-x64,node18-macos-x64,node18-linux-x64 --output ./executables/BAF-%npm_package_version%",
-    "build-executables-linux": "npm install && tsc && pkg ./build/BAF.js --targets node18-win-x64,node18-macos-x64,node18-linux-x64 --output ./executables/BAF-${npm_package_version}"
+    "build-executables-win": "npm install && tsc && pkg ./build/BAF.js --targets node18-macos-x64,node18-linux-x64 --output ./executables/BAF-%npm_package_version%",
+    "build-executables-linux": "npm install && tsc && pkg ./build/BAF.js --targets node18-macos-x64,node18-linux-x64 --output ./executables/BAF-${npm_package_version}"
   },
   "keywords": [],
-  "author": "",  
+  "author": "",
   "license": "ISC",
   "dependencies": {
     "axios": "^0.27.2",

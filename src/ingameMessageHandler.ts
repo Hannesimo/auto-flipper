@@ -149,7 +149,7 @@ export async function claimSoldItem(bot: MyBot): Promise<boolean> {
         bot.state = 'claiming'
         bot.chat('/ah')
 
-        bot.on('windowOpen', window => {
+        bot.on('windowOpen', async window => {
             let title = getWindowTitle(window)
             if (title.toString().includes('Auction House')) {
                 clickWindow(bot, 15)
@@ -163,6 +163,14 @@ export async function claimSoldItem(bot: MyBot): Promise<boolean> {
                     if (item?.nbt?.value?.display?.value?.Lore && JSON.stringify(item.nbt.value.display.value.Lore).includes('Sold for')) {
                         clickSlot = item.slot
                     }
+
+                    let includesStatus = item?.nbt?.value?.display?.value?.Lore && JSON.stringify(item.nbt.value.display.value.Lore).includes('Status')
+                    let includesSold = item?.nbt?.value?.display?.value?.Lore && JSON.stringify(item.nbt.value.display.value.Lore).includes('Expired!')
+                    if (includesStatus && includesSold) {
+                        log('Found expired auction. Gonna click slot ' + item.slot)
+                        await claimExpiredAuction(bot, item.slot)
+                    }
+
                     if (item && item.name === 'cauldron' && (item.nbt as any).value?.display?.value?.Name?.value?.toString().includes('Claim All')) {
                         log(item)
                         log('Found cauldron to claim all sold auctions -> clicking index ' + item.slot)
@@ -199,6 +207,23 @@ export async function claimSoldItem(bot: MyBot): Promise<boolean> {
                 resolve(true)
             }
         })
+    })
+}
+
+function claimExpiredAuction(bot, slot) {
+    return new Promise(resolve => {
+        bot.on('windowOpen', window => {
+            let title = getWindowTitle(window)
+            if (title == 'BIN Auction View') {
+                log('Clicking slot 31, claiming expired auction')
+                clickWindow(bot, 31)
+                bot.removeAllListeners('windowOpen')
+                bot.state = null
+                bot.closeWindow(window)
+                resolve(true)
+            }
+        })
+        clickWindow(bot, slot)
     })
 }
 

@@ -26,15 +26,13 @@ As far as I am aware mineflayer only stores the credentials in `.minecraft/nmp-c
 
 ### Executable
 
-For Windows there is a PowerShell-Script "BAF.ps1". This script automatically downloads/updates and starts the newest version from GitHub and saves it at `%appdata$/BAF`. Created files like the config and log file are also stored there. You can execute it by right-clicking and "Run with PowerShell".
+For Windows there is a PowerShell-Script "BAF.ps1". This script automatically downloads/updates and starts the newest version from GitHub and saves it at `%appdata$/BAF`. Created files like the config and log file are also stored there. You can execute it by double clicking the cmd file or right-clicking the .ps1 and click "Run with PowerShell". You need to have Node.js installed for the Windows version.
 
 You can also paste this command into the PowerShell to run the script: `Invoke-Expression (New-Object System.Net.WebClient).DownloadString("https://raw.githubusercontent.com/Hannesimo/auto-flipper/master/start_script/BAF.ps1`. This command downloads the Script and executes it.
 
-If you want to start the .exe yourself, make sure to open the PowerShell and execute the program with `./BAF-[version]-win.exe`. Don't just run it by double clicking as it will use the Windows CMD and there seems to be an internal issue with the npm minecraft-protocol package and CMD causing the bot to timeout after a while.
-
 Tutorial on how to open PowerShell: https://www.youtube.com/watch?v=aLwq9AggFw8&t=1s
 
-For Mac/Linux just execute the corresponding files as usual. I am not aware of similar issues there.
+For Mac/Linux just execute the corresponding files as usual.
 
 ### Node
 
@@ -48,17 +46,19 @@ To run or build the code, you need Node and npm.
 NOTE: You only need this if you want to build the code yourself. If you are using a executable, you can ignore the node steps.
 
 ### Linux
-To execute on linux use the following (and follow the input requests)
+
+To execute BAF on Linux use the following (and follow the input requests)
+
 ```bash
-version=1.1.9
+version=1.1.0
 wget -c https://github.com/Hannesimo/auto-flipper/releases/download/$version/BAF-$version-linux
-chmod +x BAF-$version-linux 
+chmod +x BAF-$version-linux
 ./BAF-$version-linux
 ```
 
 ## How does it work
 
--   On the first start, enter your Ingame name, this is needed for the authentication
+-   On the first start, enter your Ingame name. This is needed for the authentication
 -   Connect your Minecraft account by posting the link the bot gives you into your browser
 -   After you are authenticated, the bot should join Hypixel and teleports itself to your island
 -   After that, it automatically buys and sells flips
@@ -75,11 +75,11 @@ The bot creates a config.toml file after the first start. This file contains con
 -   500MB of RAM
 -   1 core of your CPU
 -   Stable ping, preferably under 200ms - it measures your ping and sends actions ahead of time to arrive as close on time as possible
--   Some paid plan from sky.coflnet.com
+-   **Some paid plan from sky.coflnet.com**
 
 ## Webhook
 
-You can add a Webhook URL into your config.toml to get different notifications (init, selling, purchasing, relisting).
+You can add a Webhook URL into your `config.toml` to get different notifications (init, selling, purchasing, relisting).
 Just add the line `WEBHOOK_URL = "YOUR_URL"` into your config. Make sure to place it above the sessions part (will be created automatically on your first start).
 
 ## Logging

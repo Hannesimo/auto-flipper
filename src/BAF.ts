@@ -1,6 +1,6 @@
 import { createBot } from 'mineflayer'
 import { createFastWindowClicker } from './fastWindowClick'
-import { addLoggerToClientWriteFunction, initLogger, log, printMcChatToConsole } from './logger'
+import { initLogger, log, printMcChatToConsole } from './logger'
 import { clickWindow, isCoflChatMessage, sleep } from './utils'
 import { onWebsocketCreateAuction } from './sellHandler'
 import { tradePerson } from './tradeHandler'
@@ -13,11 +13,12 @@ import { getSessionId } from './coflSessionManager'
 import { sendWebhookInitialized } from './webhookHandler'
 import { handleCommand, setupConsoleInterface } from './consoleHandler'
 import { initAFKHandler, tryToTeleportToIsland } from './AFKHandler'
+import { runSequence } from './sequenceRunner'
 const WebSocket = require('ws')
 var prompt = require('prompt-sync')()
 initConfigHelper()
 initLogger()
-const version = '1.5.1-af'
+const version = 'af-2.0.0'
 let _websocket: WebSocket
 let ingameName = getConfigProperty('INGAME_NAME')
 
@@ -33,14 +34,14 @@ const bot: MyBot = createBot({
     version: '1.17',
     host: 'mc.hypixel.net'
 })
+
 bot.setMaxListeners(0)
 
 bot.state = 'gracePeriod'
 createFastWindowClicker(bot._client)
 
-if (getConfigProperty('LOG_PACKAGES')) {
-    addLoggerToClientWriteFunction(bot._client)
-}
+// Log packets
+//addLoggerToClientWriteFunction(bot._client)
 
 bot.once('login', () => {
     connectWebsocket()
@@ -68,8 +69,10 @@ bot.once('spawn', async () => {
 })
 
 function connectWebsocket(url: string = getConfigProperty('WEBSOCKET_URL')) {
-    _websocket = new WebSocket(`${url}?player=${ingameName}&version=${version}&SId=${getSessionId(ingameName)}`)
+    log(`Called connectWebsocket for ${url}`)
+    _websocket = new WebSocket(`${url}?player=${bot.username}&version=${version}&SId=${getSessionId(ingameName)}`)
     _websocket.onopen = function () {
+        log(`Opened websocket to ${url}`)
         setupConsoleInterface(bot)
         sendWebhookInitialized()
         updatePersistentConfigProperty('WEBSOCKET_URL', url)
@@ -120,6 +123,7 @@ async function onWebsocketMessage(msg) {
         case 'swapProfile':
             log(message, 'debug')
             swapProfile(bot, data)
+
             break
         case 'createAuction':
             log(message, 'debug')
@@ -149,6 +153,9 @@ async function onWebsocketMessage(msg) {
         case 'execute':
             log(message, 'debug')
             handleCommand(bot, data)
+            break
+        case 'runSequence':
+            log(message, 'debug')
             break
         case 'privacySettings':
             log(message, 'debug')
