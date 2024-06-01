@@ -4,6 +4,7 @@ import { clickWindow, getWindowTitle } from './utils'
 import { ChatMessage } from 'prismarine-chat'
 import { sendWebhookItemPurchased, sendWebhookItemSold } from './webhookHandler'
 import { getCurrentWebsocket } from './BAF'
+import { getWhitelistedData } from './flipHandler'
 
 // if nothing gets bought for 1 hours, send a report
 let errorTimeout
@@ -29,7 +30,11 @@ export async function registerIngameMessageHandler(bot: MyBot) {
                 )
                 claimPurchased(bot)
 
-                sendWebhookItemPurchased(text.split(' purchased ')[1].split(' for ')[0], text.split(' for ')[1].split(' coins!')[0])
+                let itemName = text.split(' purchased ')[1].split(' for ')[0]
+                let price = text.split(' for ')[1].split(' coins!')[0].replace(/,/g, '')
+                let whitelistedData = getWhitelistedData(itemName, price)
+
+                sendWebhookItemPurchased(itemName, price, whitelistedData)
                 setNothingBoughtFor1HourTimeout(wss)
             }
             if (text.startsWith('[Auction]') && text.includes('bought') && text.includes('for')) {

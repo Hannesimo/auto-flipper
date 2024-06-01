@@ -35,3 +35,10 @@ interface MyBot extends Bot {
     lastViewAuctionCommandForPurchase?: string
     privacySettings?: any
 }
+
+interface FlipWhitelistedData {
+    itemName: string
+    reason: string
+    finder: string
+    price: string
+}

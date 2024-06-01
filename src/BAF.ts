@@ -1,11 +1,11 @@
 import { createBot } from 'mineflayer'
 import { createFastWindowClicker } from './fastWindowClick'
 import { initLogger, log, printMcChatToConsole } from './logger'
-import { clickWindow, isCoflChatMessage, sleep } from './utils'
+import { clickWindow, isCoflChatMessage, removeMinecraftColorCodes, sleep } from './utils'
 import { onWebsocketCreateAuction } from './sellHandler'
 import { tradePerson } from './tradeHandler'
 import { swapProfile } from './swapProfileHandler'
-import { flipHandler } from './flipHandler'
+import { flipHandler, onItemWhitelistedMessage } from './flipHandler'
 import { claimSoldItem, registerIngameMessageHandler } from './ingameMessageHandler'
 import { MyBot, TextMessageData } from '../types/autobuy'
 import { getConfigProperty, initConfigHelper, updatePersistentConfigProperty } from './configHelper'
@@ -101,6 +101,10 @@ async function onWebsocketMessage(msg) {
             flipHandler(bot, data)
             break
         case 'chatMessage':
+            if (data.length > 1 && data[1].text.includes('matched your Whitelist entry:') && !isCoflChatMessage(data[1].text)) {
+                onItemWhitelistedMessage(data[1].text)
+            }
+
             for (let da of [...(data as TextMessageData[])]) {
                 let isCoflChat = isCoflChatMessage(da.text)
                 if (!isCoflChat) {

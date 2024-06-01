@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { getConfigProperty } from './configHelper'
+import { FlipWhitelistedData } from '../types/autobuy'
 
 function sendWebhookData(options: Partial<Webhook>): void {
     let data = {
@@ -40,12 +41,12 @@ export function sendWebhookInitialized() {
     })
 }
 
-export function sendWebhookItemPurchased(itemName: string, price: string) {
+export function sendWebhookItemPurchased(itemName: string, price: string, whitelistedData: FlipWhitelistedData) {
     if (!isWebhookConfigured()) {
         return
     }
     let ingameName = getConfigProperty('INGAME_NAME')
-    sendWebhookData({
+    let webhookData = {
         embeds: [
             {
                 title: 'Item Purchased',
@@ -64,7 +65,17 @@ export function sendWebhookItemPurchased(itemName: string, price: string) {
                 thumbnail: { url: `https://minotar.net/helm/${ingameName}/600.png` }
             }
         ]
-    })
+    }
+
+    if (whitelistedData) {
+        webhookData.embeds[0].fields.push({
+            name: 'Whitelist match:',
+            value: `\`\`\`${whitelistedData.reason}\`\`\``,
+            inline: false
+        })
+    }
+
+    sendWebhookData(webhookData)
 }
 
 export function sendWebhookItemSold(itemName: string, price: string, purchasedBy: string) {

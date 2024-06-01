@@ -50,7 +50,7 @@ NOTE: You only need this if you want to build the code yourself. If you are usin
 To execute BAF on Linux use the following (and follow the input requests)
 
 ```bash
-version=2.0.0
+version=2.0.1
 wget -c https://github.com/Hannesimo/auto-flipper/releases/download/$version/BAF-$version-linux
 chmod +x BAF-$version-linux
 ./BAF-$version-linux
