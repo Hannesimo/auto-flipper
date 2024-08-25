@@ -159,8 +159,12 @@ async function onWebsocketMessage(msg) {
             handleCommand(bot, data)
             break
         case 'runSequence':
-            log(message, 'debug')
-            break
+        runSequence(bot, data)
+        .then(() => { log("Sequence finished", 'debug') })
+        .catch(err => { log(`Error running sequence: ${err.message}`, 'error') });
+        
+        log(message, 'debug');
+        break;
         case 'privacySettings':
             log(message, 'debug')
             data.chatRegex = new RegExp(data.chatRegex)
