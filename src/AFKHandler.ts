@@ -23,6 +23,14 @@ export function initAFKHandler(bot: MyBot) {
 }
 
 export async function tryToTeleportToIsland(bot: MyBot, delayBeforeTeleport = 5000) {
+    for (let i = 0; i < 5; i++) {
+        if (!bot.scoreboard.sidebar) {
+            log('Bot has no scoreboard. Waiting for it to load...')
+            await sleep(1000)
+        } else {
+            break
+        }
+    }
     if (isLimbo(bot.scoreboard.sidebar)) {
         await sleep(delayBeforeTeleport)
         log('Bot seems to be in limbo. Sending "/lobby"')

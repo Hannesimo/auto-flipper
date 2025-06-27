@@ -13,16 +13,16 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.27.2",
+    "axios": "^1.10.0",
     "json2toml": "^4.0.1",
-    "mineflayer": "^4.10.0",
+    "mineflayer": "^4.29.0",
     "prompt-sync": "^4.2.0",
     "toml": "^3.0.0",
-    "winston": "^3.8.2",
-    "ws": "^8.11.0"
+    "winston": "^3.17.0",
+    "ws": "^8.18.0"
   },
   "devDependencies": {
     "pkg": "^5.8.1",
-    "typescript": "^5.0.4"
+    "typescript": "^6.0.4"
   }
 }

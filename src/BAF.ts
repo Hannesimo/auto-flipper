@@ -27,11 +27,12 @@ if (!ingameName) {
     updatePersistentConfigProperty('INGAME_NAME', ingameName)
 }
 
+log(`Starting BAF v${version} for ${ingameName}`, 'info')
 const bot: MyBot = createBot({
     username: ingameName,
     auth: 'microsoft',
     logErrors: true,
-    version: '1.17',
+    version: '1.8.9',
     host: 'mc.hypixel.net'
 })
 
@@ -43,7 +44,11 @@ createFastWindowClicker(bot._client)
 // Log packets
 //addLoggerToClientWriteFunction(bot._client)
 
+bot.on('kicked', (reason,_)=>log(reason, 'warn'))
+bot.on('error', log)
+
 bot.once('login', () => {
+    log(`Logged in as ${bot.username}`)
     connectWebsocket()
     bot._client.on('packet', async function (packet, packetMeta) {
         if (packetMeta.name.includes('disconnect')) {
@@ -77,7 +82,14 @@ function connectWebsocket(url: string = getConfigProperty('WEBSOCKET_URL')) {
         sendWebhookInitialized()
         updatePersistentConfigProperty('WEBSOCKET_URL', url)
     }
-    _websocket.onmessage = onWebsocketMessage
+    _websocket.onmessage = function (msg) {
+        try {
+            onWebsocketMessage(msg)
+        } catch (e) {
+            log('Error while handling websocket message: ' + e, 'error')
+            log('Message: ' + JSON.stringify(msg), 'error')
+        }
+    }
     _websocket.onclose = function (e) {
         printMcChatToConsole('§f[§4BAF§f]: §4Connection closed. Reconnecting...')
         log('Connection closed. Reconnecting... ', 'warn')
@@ -169,6 +181,11 @@ async function onWebsocketMessage(msg) {
     }
 }
 
+bot.on('end', (reason) => {
+    console.log(`Bot disconnected. Reason: ${reason}`);
+    log(`Bot disconnected. Reason: ${reason}`, 'warn')
+});
+
 async function onScoreboardChanged() {
     if (
         bot.scoreboard.sidebar.items.map(item => item.displayName.getText(null).replace(item.name, '')).find(e => e.includes('Purse:') || e.includes('Piggy:'))
@@ -220,3 +237,4 @@ export async function getCurrentWebsocket(): Promise<WebSocket> {
         resolve(socket)
     })
 }
+
